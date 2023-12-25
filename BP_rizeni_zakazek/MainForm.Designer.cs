@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
             panel1 = new Panel();
             BtnUpload = new Button();
             NavPnl = new Panel();
@@ -47,7 +47,6 @@
             Customer = new DataGridViewTextBoxColumn();
             NumOfOrder = new DataGridViewTextBoxColumn();
             Date = new DataGridViewTextBoxColumn();
-            ShowOverview = new DataGridViewButtonColumn();
             panel1.SuspendLayout();
             panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
@@ -234,56 +233,51 @@
             // 
             // dataGridViewMaster
             // 
-            dataGridViewMaster.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dataGridViewMaster.BackgroundColor = SystemColors.ActiveCaption;
             dataGridViewMaster.BorderStyle = BorderStyle.None;
             dataGridViewMaster.CellBorderStyle = DataGridViewCellBorderStyle.None;
-            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = SystemColors.ButtonShadow;
-            dataGridViewCellStyle2.Font = new Font("Microsoft Sans Serif", 12F, FontStyle.Bold, GraphicsUnit.Point);
-            dataGridViewCellStyle2.ForeColor = SystemColors.WindowText;
-            dataGridViewCellStyle2.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = SystemColors.ControlLightLight;
-            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.True;
-            dataGridViewMaster.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = SystemColors.ButtonShadow;
+            dataGridViewCellStyle1.Font = new Font("Microsoft Sans Serif", 12F, FontStyle.Bold, GraphicsUnit.Point);
+            dataGridViewCellStyle1.ForeColor = SystemColors.WindowText;
+            dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = SystemColors.ControlLightLight;
+            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
+            dataGridViewMaster.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dataGridViewMaster.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewMaster.Columns.AddRange(new DataGridViewColumn[] { Customer, NumOfOrder, Date, ShowOverview });
+            dataGridViewMaster.Columns.AddRange(new DataGridViewColumn[] { Customer, NumOfOrder, Date });
             dataGridViewMaster.EnableHeadersVisualStyles = false;
+            dataGridViewMaster.GridColor = SystemColors.ScrollBar;
             dataGridViewMaster.Location = new Point(209, 38);
             dataGridViewMaster.Name = "dataGridViewMaster";
             dataGridViewMaster.RowTemplate.Height = 25;
-            dataGridViewMaster.Size = new Size(710, 505);
+            dataGridViewMaster.Size = new Size(929, 427);
             dataGridViewMaster.TabIndex = 1;
             // 
             // Customer
             // 
             Customer.HeaderText = "Zákazník";
             Customer.Name = "Customer";
+            Customer.Width = 222;
             // 
             // NumOfOrder
             // 
             NumOfOrder.HeaderText = "Číslo objednávky";
             NumOfOrder.Name = "NumOfOrder";
+            NumOfOrder.Width = 222;
             // 
             // Date
             // 
             Date.HeaderText = "Datum";
             Date.Name = "Date";
-            // 
-            // ShowOverview
-            // 
-            ShowOverview.HeaderText = "Přehled";
-            ShowOverview.Name = "ShowOverview";
-            ShowOverview.Resizable = DataGridViewTriState.True;
-            ShowOverview.SortMode = DataGridViewColumnSortMode.Automatic;
-            ShowOverview.UseColumnTextForButtonValue = true;
+            Date.Width = 222;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(46, 51, 73);
-            ClientSize = new Size(951, 577);
+            ClientSize = new Size(1159, 577);
             Controls.Add(dataGridViewMaster);
             Controls.Add(panel1);
             Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
@@ -319,6 +313,5 @@
         private DataGridViewTextBoxColumn Customer;
         private DataGridViewTextBoxColumn NumOfOrder;
         private DataGridViewTextBoxColumn Date;
-        private DataGridViewButtonColumn ShowOverview;
     }
 }

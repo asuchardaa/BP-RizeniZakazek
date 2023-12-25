@@ -26,6 +26,7 @@ namespace BP_rizeni_zakazek
         private bool isDetailRowBeingToggled = false;
         private DataGridView dataGridViewDetail;
         private List<string[]> csvLines = new List<string[]>();
+        private Dictionary<int, DataGridView> detailGrids = new Dictionary<int, DataGridView>();
 
 
         public MainForm()
@@ -37,6 +38,7 @@ namespace BP_rizeni_zakazek
             NavPnl.Left = BtnDashboard.Left;
             BtnDashboard.BackColor = Color.FromArgb(46, 51, 73);
             dataGridViewMaster.CellContentClick += new DataGridViewCellEventHandler(dataGridViewMaster_CellContentClick);
+            InitializeDataGridViewMaster();
 
         }
 
@@ -124,6 +126,21 @@ namespace BP_rizeni_zakazek
             BtnSettings.BackColor = Color.FromArgb(24, 30, 54);
         }
 
+        private void InitializeDataGridViewMaster()
+        {
+            // P¯id·nÌ sloupce pro rozbalenÌ detail˘, pokud jeötÏ neexistuje
+            if (!dataGridViewMaster.Columns.Contains("ExpandDetails"))
+            {
+                DataGridViewButtonColumn expandColumn = new DataGridViewButtonColumn();
+                expandColumn.HeaderText = ""; // nebo "Rozbalit"
+                expandColumn.Name = "ExpandDetails";
+                expandColumn.Text = "+"; // m˘ûete pouûÌt i ikonu
+                expandColumn.UseColumnTextForButtonValue = true;
+                dataGridViewMaster.Columns.Insert(0, expandColumn);
+            }
+        }
+
+
         private void BtnUpload_Click(object sender, EventArgs e)
         {
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
@@ -136,24 +153,30 @@ namespace BP_rizeni_zakazek
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
                     var filePath = openFileDialog.FileName;
-                    csvLines.Clear();
                     string[] lines = File.ReadAllLines(filePath, Encoding.UTF8);
 
                     if (lines.Length > 1)
                     {
-                        foreach (string line in lines.Skip(1))
+                        foreach (string line in lines.Skip(1)) // Skip the header
                         {
-                            string[] fields = line.Split(',');
-                            csvLines.Add(fields);
+                            string[] fields = line.Split(';');
 
-                            if (fields.Length > 9)
+                            // Filter out the unnecessary columns (for example, 7th and 8th columns)
+                            var filteredFields = fields.Where((field, index) => index != 6 && index != 8).ToArray();
+
+                            // Check if row already exists
+                            if (!RowExists(fields[0], fields[1], fields[8]))
                             {
                                 int rowIndex = dataGridViewMaster.Rows.Add();
                                 dataGridViewMaster.Rows[rowIndex].Cells["Customer"].Value = fields[0].Trim();
                                 dataGridViewMaster.Rows[rowIndex].Cells["NumOfOrder"].Value = fields[1].Trim();
                                 dataGridViewMaster.Rows[rowIndex].Cells["Date"].Value = fields[8].Trim();
 
-                                dataGridViewMaster.Rows[rowIndex].Tag = fields;
+                                dataGridViewMaster.Rows[rowIndex].Tag = new List<string[]> { filteredFields };
+                            }
+                            else
+                            {
+                                AddDetailsToExistingRow(fields[0], fields[1], fields[8], filteredFields);
                             }
                         }
                     }
@@ -161,110 +184,156 @@ namespace BP_rizeni_zakazek
             }
         }
 
-
-        private void AddDetailsRow(int rowIndex, string[] details)
+        private bool RowExists(string customer, string orderNumber, string date)
         {
-            // Ensure that there are enough elements in the details array.
-            if (details.Length >= 10) // Adjust this number based on the number of columns in your CSV file
+            foreach (DataGridViewRow row in dataGridViewMaster.Rows)
             {
-                // Select the specific fields to display
-                var selectedDetails = new List<string>
+                if (row.IsNewRow) continue; // P¯eskoËÌ nov˝ ¯·dek, kter˝ je vûdy p¯Ìtomen na konci DataGridView
+
+                var customerCell = row.Cells["Customer"].Value?.ToString() ?? "";
+                var orderNumberCell = row.Cells["NumOfOrder"].Value?.ToString() ?? "";
+                var dateCell = row.Cells["Date"].Value?.ToString() ?? "";
+
+                if (customerCell == customer && orderNumberCell == orderNumber && dateCell == date)
                 {
-                    details[2], // nazev
-                    details[3], // material
-                    details[4], // tloustka
-                    details[5], // pocet
-                    details[7], // ohyb
-                    details[9]  // cesta_k_souboru
-                };
-
-                // Create a new row for the details.
-                DataGridViewRow detailsRow = new DataGridViewRow();
-                detailsRow.CreateCells(dataGridViewMaster);
-
-                // Combine the details into a single string for display.
-                string detailsString = string.Join("; ", selectedDetails);
-                detailsRow.Cells[1].Value = "Details: " + detailsString; // Display in the second cell
-
-                // Set the style for the details row.
-                detailsRow.DefaultCellStyle.BackColor = Color.LightGray;
-
-                // Insert the detail row below the current row.
-                dataGridViewMaster.Rows.Insert(rowIndex + 1, detailsRow);
-            }
-        }
-
-        private void dataGridViewMaster_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex >= 0 && dataGridViewMaster.Columns[e.ColumnIndex].Name == "ShowOverview")
-            {
-                if (isDetailRowBeingToggled)
-                {
-                    return;
+                    return true;
                 }
+            }
+            return false;
+        }
 
-                isDetailRowBeingToggled = true;
-                DisposeDetailDataGridView();
 
-                string[] details = csvLines[e.RowIndex];
-                CreateAndShowDetailDataGridView(e.RowIndex, details);
-
-                Timer timer = new Timer();
-                timer.Interval = 100;
-                timer.Tick += (s, args) =>
+        private void AddDetailsToExistingRow(string customer, string orderNumber, string date, string[] details)
+            {
+                foreach (DataGridViewRow row in dataGridViewMaster.Rows)
                 {
-                    isDetailRowBeingToggled = false;
-                    timer.Stop();
-                };
-                timer.Start();
+                    if (row.Cells["Customer"].Value.ToString() == customer &&
+                        row.Cells["NumOfOrder"].Value.ToString() == orderNumber &&
+                        row.Cells["Date"].Value.ToString() == date)
+                    {
+                        var detailsList = (List<string[]>)row.Tag;
+                        detailsList.Add(details);
+                        break;
+                    }
+                }
+            }
+
+
+
+
+            // In your CellContentClick event, toggle the detail grid view like this:
+            private void dataGridViewMaster_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 && dataGridViewMaster.Columns[e.ColumnIndex].Name == "ExpandDetails")
+            {
+                if (detailGrids.ContainsKey(e.RowIndex) && detailGrids[e.RowIndex].Visible)
+                {
+                    // Hide the detail DataGridView
+                    DisposeDetailDataGridView(e.RowIndex);
+                }
+                else
+                {
+                    // Show a new detail DataGridView
+                    var detailsList = dataGridViewMaster.Rows[e.RowIndex].Tag as List<string[]>;
+                    if (detailsList != null)
+                    {
+                        CreateAndShowDetailDataGridView(e.RowIndex, detailsList);
+                    }
+                }
             }
         }
 
-        private void CreateAndShowDetailDataGridView(int rowIndex, string[] details)
+
+
+
+        private void CreateAndShowDetailDataGridView(int rowIndex, List<string[]> detailsList)
         {
             // Dispose of the existing detail DataGridView if it exists
-            DisposeDetailDataGridView();
+            if (detailGrids.TryGetValue(rowIndex, out var existingDetailGrid))
+            {
+                existingDetailGrid.Dispose();
+                detailGrids.Remove(rowIndex);
+            }
 
             // Create a new DataGridView for showing details
-            dataGridViewDetail = new DataGridView
+            var detailDataGridView = new DataGridView
             {
-                // Basic configuration - adjust as necessary
-                Size = new Size(dataGridViewMaster.Width, 100), // Example size
-                Location = new Point(dataGridViewMaster.Location.X,
-                    dataGridViewMaster.Location.Y + (rowIndex + 1) * dataGridViewMaster.RowTemplate.Height),
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
                 AllowUserToAddRows = false,
-                ReadOnly = true
+                ReadOnly = true,
+                BackgroundColor = Color.White,
+                BorderStyle = BorderStyle.None,
+                DefaultCellStyle = new DataGridViewCellStyle
+                {
+                    Font = new Font("Segoe UI", 9.75F),
+                    BackColor = Color.AliceBlue,
+                    ForeColor = Color.Black
+                },
+                ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
+                {
+                    Font = new Font("Segoe UI Semibold", 10F, FontStyle.Bold),
+                    BackColor = Color.CornflowerBlue,
+                    ForeColor = Color.White
+                },
+                AlternatingRowsDefaultCellStyle = new DataGridViewCellStyle
+                {
+                    BackColor = Color.WhiteSmoke
+                },
+                GridColor = Color.Gainsboro,
+                RowHeadersVisible = false,
+                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
             };
 
-            // Adding columns to the detail DataGridView
-            dataGridViewDetail.Columns.Add("nazev", "N·zev");
-            dataGridViewDetail.Columns.Add("material", "Materi·l");
-            dataGridViewDetail.Columns.Add("tloustka", "Tlouöùka");
-            dataGridViewDetail.Columns.Add("pocet", "PoËet");
-            dataGridViewDetail.Columns.Add("ohyb", "Ohyb");
-            dataGridViewDetail.Columns.Add("cestaKSouboru", "Cesta k souboru");
+            // Match the width of the master DataGridView
+            detailDataGridView.Width = dataGridViewMaster.Width;
 
-            // Adding a row with the details
-            dataGridViewDetail.Rows.Add(details[2], details[3], details[4], details[5], details[7], details[9]);
+            // Add columns to the detail DataGridView (adjust the column names as necessary)
+            detailDataGridView.Columns.Add("nazev", "N·zev");
+            detailDataGridView.Columns.Add("material", "Materi·l");
+            detailDataGridView.Columns.Add("tloustka", "Tlouöùka");
+            detailDataGridView.Columns.Add("pocet", "PoËet");
+            detailDataGridView.Columns.Add("ohyb", "Ohyb");
+            detailDataGridView.Columns.Add("cestaKSouboru", "Cesta k souboru");
 
-            // Add the new DataGridView to the form (or a specific panel if you have one)
-            this.Controls.Add(dataGridViewDetail);
+            // Add a single row with the details for now
+            foreach (var detail in detailsList)
+            {
+                detailDataGridView.Rows.Add(detail.Skip(2).Take(detailDataGridView.Columns.Count).ToArray());
+            }
+            // Adjust the height of the DataGridView to fit the number of rows
+            detailDataGridView.Height = (detailDataGridView.Rows.Count * detailDataGridView.RowTemplate.Height) + detailDataGridView.ColumnHeadersHeight;
 
-            // Bring the new DataGridView to the front to ensure it's visible
-            dataGridViewDetail.BringToFront();
+            // Calculate the location to place the DataGridView below the selected master row
+            int currentY = dataGridViewMaster.Location.Y + dataGridViewMaster.ColumnHeadersHeight;
+            for (int i = 0; i <= rowIndex; i++)
+            {
+                currentY += dataGridViewMaster.Rows[i].Height;
+            }
+            detailDataGridView.Location = new Point(dataGridViewMaster.Location.X, currentY);
+
+            // Store the DataGridView in the dictionary
+            detailGrids[rowIndex] = detailDataGridView;
+
+            // Add the DataGridView to the form's controls
+            Controls.Add(detailDataGridView);
+            detailDataGridView.BringToFront();
+
+            // Update the button text to indicate collapse
+            dataGridViewMaster.Rows[rowIndex].Cells["ExpandDetails"].Value = "-";
         }
 
-
-        private void DisposeDetailDataGridView()
+        private void DisposeDetailDataGridView(int masterRowIndex)
         {
-            if (dataGridViewDetail != null)
+            // Find and dispose the detail Panel associated with the master row index
+            if (detailGrids.TryGetValue(masterRowIndex, out var detailPanel))
             {
-                dataGridViewDetail.Dispose();
-                dataGridViewDetail = null;
+                Controls.Remove(detailPanel);
+                detailPanel.Dispose();
+                detailGrids.Remove(masterRowIndex);
+
+                // Update the button text to indicate expansion
+                dataGridViewMaster.Rows[masterRowIndex].Cells["ExpandDetails"].Value = "+";
             }
         }
-
-
-
     }
 }
