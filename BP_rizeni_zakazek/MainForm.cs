@@ -12,7 +12,6 @@ namespace BP_rizeni_zakazek
 {
     public partial class MainForm : Form
     {
-
         [DllImport("gdi32.dll", EntryPoint = "CreateRoundRectRgn")]
         private static extern IntPtr CreateRoundRectRgn
         (
@@ -38,14 +37,13 @@ namespace BP_rizeni_zakazek
             NavPnl.Top = BtnDashboard.Top;
             NavPnl.Left = BtnDashboard.Left;
             BtnDashboard.BackColor = Color.FromArgb(46, 51, 73);
-            dataGridViewMaster.CellContentClick += new DataGridViewCellEventHandler(dataGridViewMaster_CellContentClick);
+            dataGridViewMaster.CellContentClick +=
+                new DataGridViewCellEventHandler(dataGridViewMaster_CellContentClick);
             InitializeDataGridViewMaster();
-
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
         }
 
         private void ResetButtonColors()
@@ -172,7 +170,8 @@ namespace BP_rizeni_zakazek
                                 dataGridViewMaster.Rows[rowIndex].Tag = new List<string[]> { filteredFields };
 
                                 // Inicializujte DetailGrid pro tento řádek, ale nechte jej skrytý
-                                CreateAndShowDetailDataGridView(rowIndex, (List<string[]>)dataGridViewMaster.Rows[rowIndex].Tag, false);
+                                CreateAndShowDetailDataGridView(rowIndex,
+                                    (List<string[]>)dataGridViewMaster.Rows[rowIndex].Tag, false);
                             }
                             else
                             {
@@ -200,6 +199,7 @@ namespace BP_rizeni_zakazek
                     return true;
                 }
             }
+
             return false;
         }
 
@@ -217,10 +217,9 @@ namespace BP_rizeni_zakazek
                     return row.Index;
                 }
             }
-            return -1; 
+
+            return -1;
         }
-
-
 
 
         // In your CellContentClick event, toggle the detail grid view like this:
@@ -297,7 +296,8 @@ namespace BP_rizeni_zakazek
             detailDataGridView.Columns.Add("stavObjednavky", "Stav");
 
             detailDataGridView.Columns["stavObjednavky"].DefaultCellStyle.BackColor = Color.Aqua; // Defaultní barva
-            detailDataGridView.CellFormatting += new DataGridViewCellFormattingEventHandler(DetailDataGridView_CellFormatting);
+            detailDataGridView.CellFormatting +=
+                new DataGridViewCellFormattingEventHandler(DetailDataGridView_CellFormatting);
             detailDataGridView.Visible = visible;
             detailGrids[rowIndex] = detailDataGridView;
 
@@ -306,8 +306,10 @@ namespace BP_rizeni_zakazek
             {
                 detailDataGridView.Rows.Add(detail.Skip(2).Take(detailDataGridView.Columns.Count).ToArray());
             }
+
             // Adjust the height of the DataGridView to fit the number of rows
-            detailDataGridView.Height = (detailDataGridView.Rows.Count * detailDataGridView.RowTemplate.Height) + detailDataGridView.ColumnHeadersHeight;
+            detailDataGridView.Height = (detailDataGridView.Rows.Count * detailDataGridView.RowTemplate.Height) +
+                                        detailDataGridView.ColumnHeadersHeight;
 
             // Calculate the location to place the DataGridView below the selected master row
             int currentY = dataGridViewMaster.Location.Y + dataGridViewMaster.ColumnHeadersHeight;
@@ -315,6 +317,7 @@ namespace BP_rizeni_zakazek
             {
                 currentY += dataGridViewMaster.Rows[i].Height;
             }
+
             detailDataGridView.Location = new Point(dataGridViewMaster.Location.X, currentY);
 
             // Store the DataGridView in the dictionary
@@ -373,7 +376,6 @@ namespace BP_rizeni_zakazek
 
                                 foreach (var detail in detailsList)
                                 {
-
                                     Debug.WriteLine($"Detail: {string.Join(", ", detail.Select(d => d.Trim()))}");
                                     if (detail[7].Trim() == cestaKSouboru)
                                     {
@@ -381,7 +383,8 @@ namespace BP_rizeni_zakazek
                                         string originalPocet = detail[5]; // Původní počet kusů
                                         string stav = DetermineOrderStatus(vyrobeno, originalPocet);
 
-                                        Debug.WriteLine($"Nalezeno: {cestaKSouboru}, Original: {originalPocet}, Stav: {stav}");
+                                        Debug.WriteLine(
+                                            $"Nalezeno: {cestaKSouboru}, Original: {originalPocet}, Stav: {stav}");
 
 
                                         // Aktualizujte detail
@@ -397,7 +400,6 @@ namespace BP_rizeni_zakazek
                                 {
                                     Debug.WriteLine($"Nenalezena shoda pro: {cestaKSouboru}");
                                     VypisHodnotyCestaKSouboruZDetailGrid(masterRow);
-
                                 }
                             }
                         }
@@ -441,49 +443,55 @@ namespace BP_rizeni_zakazek
             }
             else if (numVyrobeno < numOriginalPocet)
             {
-                return "Rozpracováno";
+                return "Rozpracovano";
             }
             else if (numVyrobeno == numOriginalPocet)
             {
                 return "Hotovo";
             }
 
-            return "Neznámý"; // Bezpečnostní výchozí hodnota
+            return "Nehotovo";
         }
 
         private void UpdateDetailGridRow(int masterRowIndex, string[] detail)
         {
             if (detailGrids.TryGetValue(masterRowIndex, out var detailGrid))
             {
-            // Předpokládáme, že 'cestaKSouboru' je na indexu 7
-            string cestaKSouboru = detail[7].Trim();
+                // Předpokládáme, že 'cestaKSouboru' je na indexu 7
+                string cestaKSouboru = detail[7].Trim();
 
-            foreach (DataGridViewRow row in detailGrid.Rows)
-            {
-                // Najděte a aktualizujte odpovídající řádek
-                if (row.Cells["cestaKSouboru"].Value?.ToString().Trim() == cestaKSouboru)
+                foreach (DataGridViewRow row in detailGrid.Rows)
                 {
-                    // Aktualizujte buňky
-                    row.Cells["vyrobeno"].Value = detail[8]; // Předpokládáme, že 'vyrobeno' je ve sloupci s indexem odpovídajícím poli detail[8]
-                    row.Cells["stavObjednavky"].Value = detail[9]; // Předpokládáme, že 'stavObjednavky' je ve sloupci s indexem odpovídajícím poli detail[9]
+                    // Najděte a aktualizujte odpovídající řádek
+                    if (row.Cells["cestaKSouboru"].Value?.ToString().Trim() == cestaKSouboru)
+                    {
+                        // Aktualizujte buňky
+                        row.Cells["vyrobeno"].Value =
+                            detail
+                                [8]; // Předpokládáme, že 'vyrobeno' je ve sloupci s indexem odpovídajícím poli detail[8]
+                        row.Cells["stavObjednavky"].Value =
+                            detail
+                                [9]; // Předpokládáme, že 'stavObjednavky' je ve sloupci s indexem odpovídajícím poli detail[9]
 
-                    Debug.WriteLine($"Aktualizace řádku {masterRowIndex} pro {cestaKSouboru}: Vyrobeno = {detail[8]}, Stav = {detail[9]}");
+                        Debug.WriteLine(
+                            $"Aktualizace řádku {masterRowIndex} pro {cestaKSouboru}: Vyrobeno = {detail[8]}, Stav = {detail[9]}");
 
-                    break;
+                        break;
+                    }
                 }
-            }
 
-            // Po aktualizaci hodnoty můžete přímo obnovit DetailGrid, pokud je to nutné
-            detailGrid.Refresh();
+                // Po aktualizaci hodnoty můžete přímo obnovit DetailGrid, pokud je to nutné
+                detailGrid.Refresh();
+            }
         }
-    }
 
 
         private void DetailDataGridView_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
             DataGridView detailGridView = sender as DataGridView;
 
-            if (detailGridView.Columns["stavObjednavky"] != null && e.ColumnIndex == detailGridView.Columns["stavObjednavky"].Index)
+            if (detailGridView.Columns["stavObjednavky"] != null &&
+                e.ColumnIndex == detailGridView.Columns["stavObjednavky"].Index)
             {
                 string stav = (string)detailGridView.Rows[e.RowIndex].Cells["stavObjednavky"].Value;
                 e.CellStyle.BackColor = GetColorForStatus(stav);
@@ -502,7 +510,7 @@ namespace BP_rizeni_zakazek
                 case "hotovo":
                     return Color.Green;
                 default:
-                    return Color.Aqua;
+                    return Color.Red;
             }
         }
     }
