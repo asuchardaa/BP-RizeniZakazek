@@ -368,6 +368,7 @@ namespace BP_rizeni_zakazek
                             {
                                 string[] fields = line.Split(';');
                                 string cestaKSouboru = fields[9].Trim(); // 10. sloupec v CSV
+                                string ohyb = fields[7].Trim(); // 7. sloupec v CSV
                                 string vyrobeno = fields[5].Trim(); // 6. sloupec v CSV
 
                                 Debug.WriteLine($"Hledání: {cestaKSouboru}, Vyrobeno: {vyrobeno}");
@@ -381,7 +382,7 @@ namespace BP_rizeni_zakazek
                                     {
                                         foundMatch = true;
                                         string originalPocet = detail[5]; // Původní počet kusů
-                                        string stav = DetermineOrderStatus(vyrobeno, originalPocet);
+                                        string stav = DetermineOrderStatus(vyrobeno, originalPocet, ohyb);
 
                                         Debug.WriteLine(
                                             $"Nalezeno: {cestaKSouboru}, Original: {originalPocet}, Stav: {stav}");
@@ -420,18 +421,16 @@ namespace BP_rizeni_zakazek
             }
         }
 
-        private string DetermineOrderStatus(string vyrobeno, string originalPocet)
+        private string DetermineOrderStatus(string vyrobeno, string originalPocet, String ohyb)
         {
-            // Převedení řetězců na čísla pro porovnání
             bool parseVyrobeno = int.TryParse(vyrobeno, out int numVyrobeno);
             bool parseOriginalPocet = int.TryParse(originalPocet, out int numOriginalPocet);
 
-            Debug.WriteLine($"\nVyrobeno: {vyrobeno}, OriginalPocet: {originalPocet}\n");
+            Debug.WriteLine($"\nDetermineOrderStatus - Vyrobeno: {vyrobeno}, OriginalPocet: {originalPocet}, Ohyb: {ohyb}\n");
             Debug.WriteLine($"\nParsed Vyrobeno: {numVyrobeno}, Parsed OriginalPocet: {numOriginalPocet}\n");
 
             if (!parseVyrobeno || !parseOriginalPocet)
             {
-                // Pokud nelze hodnoty převést na čísla, vrátíme defaultní stav
                 Debug.WriteLine("Nepodařilo se zpracovat čísla pro vyrobeno nebo originalPocet.");
 
                 return "chyba přev";
@@ -441,11 +440,11 @@ namespace BP_rizeni_zakazek
             {
                 return "Nehotovo";
             }
-            else if (numVyrobeno < numOriginalPocet)
+            else if (numVyrobeno != numOriginalPocet || ohyb.Equals("ANO", StringComparison.OrdinalIgnoreCase))
             {
                 return "Rozpracovano";
             }
-            else if (numVyrobeno == numOriginalPocet)
+            else if (numVyrobeno == numOriginalPocet && ohyb.Equals("NE", StringComparison.OrdinalIgnoreCase))
             {
                 return "Hotovo";
             }
@@ -457,21 +456,18 @@ namespace BP_rizeni_zakazek
         {
             if (detailGrids.TryGetValue(masterRowIndex, out var detailGrid))
             {
-                // Předpokládáme, že 'cestaKSouboru' je na indexu 7
                 string cestaKSouboru = detail[7].Trim();
 
                 foreach (DataGridViewRow row in detailGrid.Rows)
                 {
-                    // Najděte a aktualizujte odpovídající řádek
                     if (row.Cells["cestaKSouboru"].Value?.ToString().Trim() == cestaKSouboru)
                     {
-                        // Aktualizujte buňky
                         row.Cells["vyrobeno"].Value =
                             detail
-                                [8]; // Předpokládáme, že 'vyrobeno' je ve sloupci s indexem odpovídajícím poli detail[8]
+                                [8];
                         row.Cells["stavObjednavky"].Value =
                             detail
-                                [9]; // Předpokládáme, že 'stavObjednavky' je ve sloupci s indexem odpovídajícím poli detail[9]
+                                [9];
 
                         Debug.WriteLine(
                             $"Aktualizace řádku {masterRowIndex} pro {cestaKSouboru}: Vyrobeno = {detail[8]}, Stav = {detail[9]}");
@@ -480,7 +476,6 @@ namespace BP_rizeni_zakazek
                     }
                 }
 
-                // Po aktualizaci hodnoty můžete přímo obnovit DetailGrid, pokud je to nutné
                 detailGrid.Refresh();
             }
         }
@@ -504,13 +499,13 @@ namespace BP_rizeni_zakazek
             switch (status.ToLower())
             {
                 case "nehotovo":
-                    return Color.Red;
+                    return Color.Gray;
                 case "rozpracovano":
                     return Color.Yellow;
                 case "hotovo":
                     return Color.Green;
                 default:
-                    return Color.Red;
+                    return Color.White;
             }
         }
     }
