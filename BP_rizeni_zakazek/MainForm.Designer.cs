@@ -31,6 +31,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
             panel1 = new Panel();
+            BtnUploadHot = new Button();
             BtnUpload = new Button();
             NavPnl = new Panel();
             BtnSettings = new Button();
@@ -56,6 +57,7 @@
             // panel1
             // 
             panel1.BackColor = Color.FromArgb(24, 30, 54);
+            panel1.Controls.Add(BtnUploadHot);
             panel1.Controls.Add(BtnUpload);
             panel1.Controls.Add(NavPnl);
             panel1.Controls.Add(BtnSettings);
@@ -68,16 +70,26 @@
             panel1.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
             panel1.Location = new Point(0, 0);
             panel1.Name = "panel1";
-            panel1.Size = new Size(186, 577);
+            panel1.Size = new Size(186, 633);
             panel1.TabIndex = 0;
+            // 
+            // BtnUploadHot
+            // 
+            BtnUploadHot.Location = new Point(93, 562);
+            BtnUploadHot.Name = "BtnUploadHot";
+            BtnUploadHot.Size = new Size(75, 23);
+            BtnUploadHot.TabIndex = 7;
+            BtnUploadHot.Text = "UploadHot";
+            BtnUploadHot.UseVisualStyleBackColor = true;
+            BtnUploadHot.Click += BtnUploadHot_Click;
             // 
             // BtnUpload
             // 
-            BtnUpload.Location = new Point(48, 506);
+            BtnUpload.Location = new Point(12, 562);
             BtnUpload.Name = "BtnUpload";
             BtnUpload.Size = new Size(75, 23);
             BtnUpload.TabIndex = 6;
-            BtnUpload.Text = "Upload";
+            BtnUpload.Text = "UploadZak";
             BtnUpload.UseVisualStyleBackColor = true;
             BtnUpload.Click += BtnUpload_Click;
             // 
@@ -97,7 +109,7 @@
             BtnSettings.Font = new Font("Nirmala UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point);
             BtnSettings.ForeColor = Color.FromArgb(0, 126, 249);
             BtnSettings.Image = (Image)resources.GetObject("BtnSettings.Image");
-            BtnSettings.Location = new Point(0, 535);
+            BtnSettings.Location = new Point(0, 591);
             BtnSettings.Name = "BtnSettings";
             BtnSettings.Size = new Size(186, 42);
             BtnSettings.TabIndex = 5;
@@ -251,7 +263,7 @@
             dataGridViewMaster.Location = new Point(209, 38);
             dataGridViewMaster.Name = "dataGridViewMaster";
             dataGridViewMaster.RowTemplate.Height = 25;
-            dataGridViewMaster.Size = new Size(929, 427);
+            dataGridViewMaster.Size = new Size(1122, 570);
             dataGridViewMaster.TabIndex = 1;
             // 
             // Customer
@@ -277,7 +289,7 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(46, 51, 73);
-            ClientSize = new Size(1159, 577);
+            ClientSize = new Size(1370, 633);
             Controls.Add(dataGridViewMaster);
             Controls.Add(panel1);
             Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
@@ -313,5 +325,6 @@
         private DataGridViewTextBoxColumn Customer;
         private DataGridViewTextBoxColumn NumOfOrder;
         private DataGridViewTextBoxColumn Date;
+        private Button BtnUploadHot;
     }
 }
