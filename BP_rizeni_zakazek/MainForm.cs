@@ -39,7 +39,6 @@ namespace BP_rizeni_zakazek
                 new DataGridViewCellEventHandler(dataGridViewMaster_CellContentClick);
             InitializeDataGridViewMaster();
             this.Load += new System.EventHandler(this.Form1_Load);
-
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -48,7 +47,7 @@ namespace BP_rizeni_zakazek
             OrderDoneOrNotDone.Items.Add("Vše");
             OrderDoneOrNotDone.Items.Add("Hotovo");
             OrderDoneOrNotDone.Items.Add("Rozpracováno");
-            OrderDoneOrNotDone.SelectedIndex = 0; // Vybere první položku ("Vše") jako výchozí
+            OrderDoneOrNotDone.SelectedIndex = 0;
         }
 
         private void ResetButtonColors()
@@ -140,12 +139,13 @@ namespace BP_rizeni_zakazek
                 DataGridViewButtonColumn expandColumn = new DataGridViewButtonColumn();
                 expandColumn.HeaderText = "";
                 expandColumn.Name = "ExpandDetails";
-                expandColumn.Text = "+";
-                expandColumn.UseColumnTextForButtonValue = true;
+                // Removed the Text property assignment
+                expandColumn.UseColumnTextForButtonValue = false; // Set to false
                 expandColumn.Width = 40;
                 dataGridViewMaster.Columns.Insert(0, expandColumn);
             }
         }
+
 
         /// <summary>
         /// Metoda pro nahrání vstupního CSV a vytvoření řádků v masterGridu
@@ -193,8 +193,8 @@ namespace BP_rizeni_zakazek
                     }
                 }
             }
-            UpdateAllMasterGridRowStatuses();
 
+            UpdateAllMasterGridRowStatuses();
         }
 
         /// <summary>
@@ -257,9 +257,13 @@ namespace BP_rizeni_zakazek
         {
             if (e.RowIndex >= 0 && dataGridViewMaster.Columns[e.ColumnIndex].Name == "ExpandDetails")
             {
-                if (detailGrids.ContainsKey(e.RowIndex) && detailGrids[e.RowIndex].Visible)
+                var buttonCell = dataGridViewMaster.Rows[e.RowIndex].Cells["ExpandDetails"];
+                bool isDetailVisible = detailGrids.ContainsKey(e.RowIndex) && detailGrids[e.RowIndex].Visible;
+
+                if (isDetailVisible)
                 {
                     DisposeDetailDataGridView(e.RowIndex);
+                    buttonCell.Value = "+";
                 }
                 else
                 {
@@ -267,8 +271,11 @@ namespace BP_rizeni_zakazek
                     if (detailsList != null)
                     {
                         CreateAndShowDetailDataGridView(e.RowIndex, detailsList, visible: true);
+                        buttonCell.Value = "-";
                     }
                 }
+
+                dataGridViewMaster.InvalidateRow(e.RowIndex); // Forces the row to redraw
             }
         }
 
@@ -339,9 +346,11 @@ namespace BP_rizeni_zakazek
             {
                 //detailDataGridView.Rows.Add(detail.Skip(2).Take(detailDataGridView.Columns.Count).ToArray());
 
-                int detailIndex = detailDataGridView.Rows.Add(detail.Skip(2).Take(detailDataGridView.Columns.Count).ToArray());
+                int detailIndex =
+                    detailDataGridView.Rows.Add(detail.Skip(2).Take(detailDataGridView.Columns.Count).ToArray());
                 string stavObjednavky = string.IsNullOrEmpty(detail[9]) ? "Neznámý" : detail[9];
                 detailDataGridView.Rows[detailIndex].Cells["stavObjednavky"].Value = stavObjednavky;
+                dataGridViewMaster.Rows[rowIndex].Cells["ExpandDetails"].Value = "+";
             }
 
             detailDataGridView.Height = (detailDataGridView.Rows.Count * detailDataGridView.RowTemplate.Height) +
@@ -354,13 +363,12 @@ namespace BP_rizeni_zakazek
             }
 
             detailDataGridView.Location = new Point(dataGridViewMaster.Location.X, currentY);
-
             detailGrids[rowIndex] = detailDataGridView;
+            this.Controls.Add(detailDataGridView);
+            detailDataGridView.BringToFront();
 
             if (visible)
             {
-                this.Controls.Add(detailDataGridView);
-                detailDataGridView.BringToFront();
                 dataGridViewMaster.Rows[rowIndex].Cells["ExpandDetails"].Value = "-";
             }
         }
@@ -439,6 +447,7 @@ namespace BP_rizeni_zakazek
                     }
                 }
             }
+
             UpdateAllMasterGridRowStatuses();
         }
 
@@ -508,7 +517,6 @@ namespace BP_rizeni_zakazek
                 int dateColIndex = dataGridViewMaster.Columns["Date"].Index;
                 HighlightOverdueDates(masterRow, dateColIndex);
                 return resultStatus;
-
             }
 
             return "Neznámý";
@@ -695,7 +703,6 @@ namespace BP_rizeni_zakazek
         private void FilterTextBox_TextChanged(object sender, EventArgs e)
         {
             ApplyFilter();
-
         }
 
         /// <summary>
@@ -706,7 +713,6 @@ namespace BP_rizeni_zakazek
         private void comboBox1_OrderDoneOrNotDone(object sender, EventArgs e)
         {
             ApplyFilter();
-
         }
 
         /// <summary>
@@ -719,7 +725,8 @@ namespace BP_rizeni_zakazek
 
             foreach (DataGridViewRow row in dataGridViewMaster.Rows)
             {
-                bool textMatches = row.Cells["Customer"].Value.ToString().ToLower().Contains(searchText) || row.Cells["NumOfOrder"].Value.ToString().ToLower().Contains(searchText);
+                bool textMatches = row.Cells["Customer"].Value.ToString().ToLower().Contains(searchText) ||
+                                   row.Cells["NumOfOrder"].Value.ToString().ToLower().Contains(searchText);
                 bool statusMatches;
 
                 if (selectedStatus == "Vše")
@@ -728,7 +735,8 @@ namespace BP_rizeni_zakazek
                 }
                 else
                 {
-                    statusMatches = row.Cells["StateOfOrder"].Value.ToString().Equals(selectedStatus, StringComparison.OrdinalIgnoreCase);
+                    statusMatches = row.Cells["StateOfOrder"].Value.ToString()
+                        .Equals(selectedStatus, StringComparison.OrdinalIgnoreCase);
                 }
 
                 row.Visible = textMatches && statusMatches;
