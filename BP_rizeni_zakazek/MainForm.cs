@@ -6,6 +6,7 @@ using System.Text;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 using Timer = System.Windows.Forms.Timer;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace BP_rizeni_zakazek
 
@@ -37,10 +38,17 @@ namespace BP_rizeni_zakazek
             dataGridViewMaster.CellContentClick +=
                 new DataGridViewCellEventHandler(dataGridViewMaster_CellContentClick);
             InitializeDataGridViewMaster();
+            this.Load += new System.EventHandler(this.Form1_Load);
+
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            OrderDoneOrNotDone.Items.Clear();
+            OrderDoneOrNotDone.Items.Add("Vše");
+            OrderDoneOrNotDone.Items.Add("Hotovo");
+            OrderDoneOrNotDone.Items.Add("Rozpracováno");
+            OrderDoneOrNotDone.SelectedIndex = 0; // Vybere první položku ("Vše") jako výchozí
         }
 
         private void ResetButtonColors()
@@ -470,8 +478,8 @@ namespace BP_rizeni_zakazek
                     }
                     else
                     {
-                        allDone = false; 
-                        if (status.Equals("Rozpracovano", StringComparison.OrdinalIgnoreCase) ||
+                        allDone = false;
+                        if (status.Equals("Rozpracováno", StringComparison.OrdinalIgnoreCase) ||
                             status.Equals("Hotovo", StringComparison.OrdinalIgnoreCase))
                         {
                             anyInProgressOrComplete = true; // alespoň jeden "Rozpracovano" nebo "Hotovo"
@@ -487,7 +495,7 @@ namespace BP_rizeni_zakazek
                 }
                 else if (anyInProgressOrComplete)
                 {
-                    resultStatus = "Rozpracovano";
+                    resultStatus = "Rozpracováno";
                 }
                 else
                 {
@@ -519,7 +527,7 @@ namespace BP_rizeni_zakazek
                 case "Hotovo":
                     color = Color.Green;
                     break;
-                case "Rozpracovano":
+                case "Rozpracováno":
                     color = Color.Yellow;
                     break;
                 case "Nezadáno":
@@ -602,7 +610,7 @@ namespace BP_rizeni_zakazek
             }
             else if (numVyrobeno != numOriginalPocet || ohyb.Equals("ANO", StringComparison.OrdinalIgnoreCase))
             {
-                return "Rozpracovano";
+                return "Rozpracováno";
             }
             else if (numVyrobeno == numOriginalPocet && ohyb.Equals("NE", StringComparison.OrdinalIgnoreCase))
             {
@@ -670,12 +678,60 @@ namespace BP_rizeni_zakazek
             {
                 case "neznámý":
                     return Color.LightGray;
-                case "rozpracovano":
+                case "rozpracováno":
                     return Color.Yellow;
                 case "hotovo":
                     return Color.Green;
                 default:
                     return Color.White;
+            }
+        }
+
+        /// <summary>
+        /// Metoda pro aplikaci filtru na textBox pro vyhledávání zákazníka a čísla zakázky
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void FilterTextBox_TextChanged(object sender, EventArgs e)
+        {
+            ApplyFilter();
+
+        }
+
+        /// <summary>
+        /// Metoda pro aplikaci filtru na comboBox s hotovo/rozpracováno/vše
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void comboBox1_OrderDoneOrNotDone(object sender, EventArgs e)
+        {
+            ApplyFilter();
+
+        }
+
+        /// <summary>
+        /// Metoda pro aplikaci filtru na masterGrid
+        /// </summary>
+        private void ApplyFilter()
+        {
+            string searchText = FilterTextBox.Text.ToLower();
+            string selectedStatus = OrderDoneOrNotDone.SelectedItem.ToString();
+
+            foreach (DataGridViewRow row in dataGridViewMaster.Rows)
+            {
+                bool textMatches = row.Cells["Customer"].Value.ToString().ToLower().Contains(searchText) || row.Cells["NumOfOrder"].Value.ToString().ToLower().Contains(searchText);
+                bool statusMatches;
+
+                if (selectedStatus == "Vše")
+                {
+                    statusMatches = true;
+                }
+                else
+                {
+                    statusMatches = row.Cells["StateOfOrder"].Value.ToString().Equals(selectedStatus, StringComparison.OrdinalIgnoreCase);
+                }
+
+                row.Visible = textMatches && statusMatches;
             }
         }
     }

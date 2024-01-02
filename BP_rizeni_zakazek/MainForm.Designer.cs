@@ -29,8 +29,10 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             panel1 = new Panel();
+            OrderDoneOrNotDone = new ComboBox();
+            FilterTextBox = new TextBox();
             BtnUploadHot = new Button();
             BtnUpload = new Button();
             NavPnl = new Panel();
@@ -41,8 +43,8 @@
             BtnDashboard = new Button();
             panel2 = new Panel();
             PnlNav = new Panel();
-            label2 = new Label();
-            label1 = new Label();
+            OrganizationName = new Label();
+            userName = new Label();
             pictureBox1 = new PictureBox();
             dataGridViewMaster = new DataGridView();
             Customer = new DataGridViewTextBoxColumn();
@@ -59,6 +61,8 @@
             // panel1
             // 
             panel1.BackColor = Color.FromArgb(24, 30, 54);
+            panel1.Controls.Add(OrderDoneOrNotDone);
+            panel1.Controls.Add(FilterTextBox);
             panel1.Controls.Add(BtnUploadHot);
             panel1.Controls.Add(BtnUpload);
             panel1.Controls.Add(NavPnl);
@@ -74,6 +78,23 @@
             panel1.Name = "panel1";
             panel1.Size = new Size(186, 633);
             panel1.TabIndex = 0;
+            // 
+            // OrderDoneOrNotDone
+            // 
+            OrderDoneOrNotDone.FormattingEnabled = true;
+            OrderDoneOrNotDone.Location = new Point(12, 518);
+            OrderDoneOrNotDone.Name = "OrderDoneOrNotDone";
+            OrderDoneOrNotDone.Size = new Size(121, 23);
+            OrderDoneOrNotDone.TabIndex = 9;
+            OrderDoneOrNotDone.SelectedIndexChanged += comboBox1_OrderDoneOrNotDone;
+            // 
+            // FilterTextBox
+            // 
+            FilterTextBox.Location = new Point(12, 478);
+            FilterTextBox.Name = "FilterTextBox";
+            FilterTextBox.Size = new Size(121, 23);
+            FilterTextBox.TabIndex = 8;
+            FilterTextBox.TextChanged += FilterTextBox_TextChanged;
             // 
             // BtnUploadHot
             // 
@@ -196,8 +217,8 @@
             // panel2
             // 
             panel2.Controls.Add(PnlNav);
-            panel2.Controls.Add(label2);
-            panel2.Controls.Add(label1);
+            panel2.Controls.Add(OrganizationName);
+            panel2.Controls.Add(userName);
             panel2.Controls.Add(pictureBox1);
             panel2.Dock = DockStyle.Top;
             panel2.Location = new Point(0, 0);
@@ -213,27 +234,27 @@
             PnlNav.Size = new Size(3, 100);
             PnlNav.TabIndex = 3;
             // 
-            // label2
+            // OrganizationName
             // 
-            label2.AutoSize = true;
-            label2.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Bold, GraphicsUnit.Point);
-            label2.ForeColor = Color.FromArgb(158, 161, 178);
-            label2.Location = new Point(30, 128);
-            label2.Name = "label2";
-            label2.Size = new Size(126, 13);
-            label2.TabIndex = 2;
-            label2.Text = "Some User Text here";
+            OrganizationName.AutoSize = true;
+            OrganizationName.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Bold, GraphicsUnit.Point);
+            OrganizationName.ForeColor = Color.FromArgb(158, 161, 178);
+            OrganizationName.Location = new Point(37, 127);
+            OrganizationName.Name = "OrganizationName";
+            OrganizationName.Size = new Size(109, 13);
+            OrganizationName.TabIndex = 2;
+            OrganizationName.Text = "Jméno organizace";
             // 
-            // label1
+            // userName
             // 
-            label1.AutoSize = true;
-            label1.Font = new Font("Microsoft Sans Serif", 9.75F, FontStyle.Bold, GraphicsUnit.Point);
-            label1.ForeColor = Color.FromArgb(0, 126, 249);
-            label1.Location = new Point(48, 100);
-            label1.Name = "label1";
-            label1.Size = new Size(85, 16);
-            label1.TabIndex = 1;
-            label1.Text = "User Name";
+            userName.AutoSize = true;
+            userName.Font = new Font("Microsoft Sans Serif", 9.75F, FontStyle.Bold, GraphicsUnit.Point);
+            userName.ForeColor = Color.FromArgb(0, 126, 249);
+            userName.Location = new Point(45, 98);
+            userName.Name = "userName";
+            userName.Size = new Size(88, 16);
+            userName.TabIndex = 1;
+            userName.Text = "User/Admin";
             // 
             // pictureBox1
             // 
@@ -251,14 +272,14 @@
             dataGridViewMaster.BackgroundColor = SystemColors.ActiveCaption;
             dataGridViewMaster.BorderStyle = BorderStyle.None;
             dataGridViewMaster.CellBorderStyle = DataGridViewCellBorderStyle.None;
-            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = SystemColors.ButtonShadow;
-            dataGridViewCellStyle1.Font = new Font("Microsoft Sans Serif", 12F, FontStyle.Bold, GraphicsUnit.Point);
-            dataGridViewCellStyle1.ForeColor = SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = SystemColors.ControlLightLight;
-            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
-            dataGridViewMaster.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = SystemColors.ButtonShadow;
+            dataGridViewCellStyle2.Font = new Font("Microsoft Sans Serif", 12F, FontStyle.Bold, GraphicsUnit.Point);
+            dataGridViewCellStyle2.ForeColor = SystemColors.WindowText;
+            dataGridViewCellStyle2.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = SystemColors.ControlLightLight;
+            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.True;
+            dataGridViewMaster.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
             dataGridViewMaster.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dataGridViewMaster.Columns.AddRange(new DataGridViewColumn[] { Customer, NumOfOrder, Date, dateOfFinish, stateOfOrder });
             dataGridViewMaster.EnableHeadersVisualStyles = false;
@@ -314,6 +335,7 @@
             Text = "DU-PE - Řízení zakázek";
             Load += Form1_Load;
             panel1.ResumeLayout(false);
+            panel1.PerformLayout();
             panel2.ResumeLayout(false);
             panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
@@ -326,9 +348,9 @@
         private Panel panel1;
         private Panel panel2;
         private PictureBox pictureBox1;
-        private Label label1;
+        private Label userName;
         private Button BtnDashboard;
-        private Label label2;
+        private Label OrganizationName;
         private Button BtnSettings;
         private Button BtnArchive;
         private Button BtnCalender;
@@ -343,5 +365,7 @@
         private DataGridViewTextBoxColumn Date;
         private DataGridViewTextBoxColumn dateOfFinish;
         private DataGridViewTextBoxColumn stateOfOrder;
+        private ComboBox OrderDoneOrNotDone;
+        private TextBox FilterTextBox;
     }
 }
