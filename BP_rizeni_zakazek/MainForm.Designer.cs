@@ -48,6 +48,8 @@
             Customer = new DataGridViewTextBoxColumn();
             NumOfOrder = new DataGridViewTextBoxColumn();
             Date = new DataGridViewTextBoxColumn();
+            dateOfFinish = new DataGridViewTextBoxColumn();
+            stateOfOrder = new DataGridViewTextBoxColumn();
             panel1.SuspendLayout();
             panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
@@ -245,6 +247,7 @@
             // 
             // dataGridViewMaster
             // 
+            dataGridViewMaster.AllowUserToAddRows = false;
             dataGridViewMaster.BackgroundColor = SystemColors.ActiveCaption;
             dataGridViewMaster.BorderStyle = BorderStyle.None;
             dataGridViewMaster.CellBorderStyle = DataGridViewCellBorderStyle.None;
@@ -257,7 +260,7 @@
             dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
             dataGridViewMaster.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dataGridViewMaster.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewMaster.Columns.AddRange(new DataGridViewColumn[] { Customer, NumOfOrder, Date });
+            dataGridViewMaster.Columns.AddRange(new DataGridViewColumn[] { Customer, NumOfOrder, Date, dateOfFinish, stateOfOrder });
             dataGridViewMaster.EnableHeadersVisualStyles = false;
             dataGridViewMaster.GridColor = SystemColors.ScrollBar;
             dataGridViewMaster.Location = new Point(209, 38);
@@ -270,19 +273,31 @@
             // 
             Customer.HeaderText = "Zákazník";
             Customer.Name = "Customer";
-            Customer.Width = 222;
+            Customer.Width = 215;
             // 
             // NumOfOrder
             // 
             NumOfOrder.HeaderText = "Číslo objednávky";
             NumOfOrder.Name = "NumOfOrder";
-            NumOfOrder.Width = 222;
+            NumOfOrder.Width = 215;
             // 
             // Date
             // 
             Date.HeaderText = "Datum";
             Date.Name = "Date";
-            Date.Width = 222;
+            Date.Width = 198;
+            // 
+            // dateOfFinish
+            // 
+            dateOfFinish.HeaderText = "Dokončeno";
+            dateOfFinish.Name = "dateOfFinish";
+            dateOfFinish.Width = 198;
+            // 
+            // stateOfOrder
+            // 
+            stateOfOrder.HeaderText = "Stav";
+            stateOfOrder.Name = "stateOfOrder";
+            stateOfOrder.Width = 215;
             // 
             // MainForm
             // 
@@ -322,9 +337,11 @@
         private Panel NavPnl;
         private Button BtnUpload;
         private DataGridView dataGridViewMaster;
+        private Button BtnUploadHot;
         private DataGridViewTextBoxColumn Customer;
         private DataGridViewTextBoxColumn NumOfOrder;
         private DataGridViewTextBoxColumn Date;
-        private Button BtnUploadHot;
+        private DataGridViewTextBoxColumn dateOfFinish;
+        private DataGridViewTextBoxColumn stateOfOrder;
     }
 }

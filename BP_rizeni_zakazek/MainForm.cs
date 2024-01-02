@@ -23,9 +23,6 @@ namespace BP_rizeni_zakazek
             int nHeightEllipse
         );
 
-        private bool isDetailRowBeingToggled = false;
-        private DataGridView dataGridViewDetail;
-        private List<string[]> csvLines = new List<string[]>();
         private Dictionary<int, DataGridView> detailGrids = new Dictionary<int, DataGridView>();
 
 
@@ -127,14 +124,14 @@ namespace BP_rizeni_zakazek
 
         private void InitializeDataGridViewMaster()
         {
-            // P�id�n� sloupce pro rozbalen� detail�, pokud je�t� neexistuje
             if (!dataGridViewMaster.Columns.Contains("ExpandDetails"))
             {
                 DataGridViewButtonColumn expandColumn = new DataGridViewButtonColumn();
-                expandColumn.HeaderText = ""; // nebo "Rozbalit"
+                expandColumn.HeaderText = "";
                 expandColumn.Name = "ExpandDetails";
-                expandColumn.Text = "+"; // m��ete pou��t i ikonu
+                expandColumn.Text = "+";
                 expandColumn.UseColumnTextForButtonValue = true;
+                expandColumn.Width = 40;
                 dataGridViewMaster.Columns.Insert(0, expandColumn);
             }
         }
@@ -169,19 +166,20 @@ namespace BP_rizeni_zakazek
                                 dataGridViewMaster.Rows[rowIndex].Cells["Date"].Value = fields[8].Trim();
                                 dataGridViewMaster.Rows[rowIndex].Tag = new List<string[]> { filteredFields };
 
-                                // Inicializujte DetailGrid pro tento řádek, ale nechte jej skrytý
+                                // inicializace, ale zatím nechávám skrytý
                                 CreateAndShowDetailDataGridView(rowIndex,
                                     (List<string[]>)dataGridViewMaster.Rows[rowIndex].Tag, false);
                             }
                             else
                             {
-                                // Pokud řádek již existuje, přidejte do něj detaily
                                 AddDetailsToExistingRow(fields[0], fields[1], fields[8], filteredFields);
                             }
                         }
                     }
                 }
             }
+            UpdateAllMasterGridRowStatuses();
+
         }
 
         private bool RowExists(string customer, string orderNumber, string date)
@@ -222,19 +220,16 @@ namespace BP_rizeni_zakazek
         }
 
 
-        // In your CellContentClick event, toggle the detail grid view like this:
         private void dataGridViewMaster_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0 && dataGridViewMaster.Columns[e.ColumnIndex].Name == "ExpandDetails")
             {
                 if (detailGrids.ContainsKey(e.RowIndex) && detailGrids[e.RowIndex].Visible)
                 {
-                    // Hide the detail DataGridView
                     DisposeDetailDataGridView(e.RowIndex);
                 }
                 else
                 {
-                    // Show a new detail DataGridView
                     var detailsList = dataGridViewMaster.Rows[e.RowIndex].Tag as List<string[]>;
                     if (detailsList != null)
                     {
@@ -261,11 +256,15 @@ namespace BP_rizeni_zakazek
                 ReadOnly = true,
                 BackgroundColor = Color.White,
                 BorderStyle = BorderStyle.None,
+                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
                 DefaultCellStyle = new DataGridViewCellStyle
                 {
                     Font = new Font("Segoe UI", 9.75F),
                     BackColor = Color.AliceBlue,
-                    ForeColor = Color.Black
+                    ForeColor = Color.Black,
+                    // V případě potřeby organizace, Selection BC a FC odkomentovat pro zobrazení barvy výběru
+                    // SelectionBackColor = Color.AliceBlue,
+                    // SelectionForeColor = Color.Black
                 },
                 ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
                 {
@@ -278,8 +277,7 @@ namespace BP_rizeni_zakazek
                     BackColor = Color.WhiteSmoke
                 },
                 GridColor = Color.Gainsboro,
-                RowHeadersVisible = false,
-                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+                RowHeadersVisible = false
             };
 
             // Match the width of the master DataGridView
@@ -295,23 +293,26 @@ namespace BP_rizeni_zakazek
             detailDataGridView.Columns.Add("vyrobeno", "Vyrobeno");
             detailDataGridView.Columns.Add("stavObjednavky", "Stav");
 
-            detailDataGridView.Columns["stavObjednavky"].DefaultCellStyle.BackColor = Color.Aqua; // Defaultní barva
+            detailDataGridView.Columns["stavObjednavky"].DefaultCellStyle.BackColor = Color.White;
+
             detailDataGridView.CellFormatting +=
                 new DataGridViewCellFormattingEventHandler(DetailDataGridView_CellFormatting);
             detailDataGridView.Visible = visible;
             detailGrids[rowIndex] = detailDataGridView;
 
-            // Add a single row with the details for now
             foreach (var detail in detailsList)
             {
-                detailDataGridView.Rows.Add(detail.Skip(2).Take(detailDataGridView.Columns.Count).ToArray());
+                //detailDataGridView.Rows.Add(detail.Skip(2).Take(detailDataGridView.Columns.Count).ToArray());
+                Debug.WriteLine(string.Join(", ", detail));
+
+                int detailIndex = detailDataGridView.Rows.Add(detail.Skip(2).Take(detailDataGridView.Columns.Count).ToArray());
+                string stavObjednavky = string.IsNullOrEmpty(detail[9]) ? "Neznámý" : detail[9];
+                detailDataGridView.Rows[detailIndex].Cells["stavObjednavky"].Value = stavObjednavky;
             }
 
-            // Adjust the height of the DataGridView to fit the number of rows
             detailDataGridView.Height = (detailDataGridView.Rows.Count * detailDataGridView.RowTemplate.Height) +
                                         detailDataGridView.ColumnHeadersHeight;
 
-            // Calculate the location to place the DataGridView below the selected master row
             int currentY = dataGridViewMaster.Location.Y + dataGridViewMaster.ColumnHeadersHeight;
             for (int i = 0; i <= rowIndex; i++)
             {
@@ -320,7 +321,6 @@ namespace BP_rizeni_zakazek
 
             detailDataGridView.Location = new Point(dataGridViewMaster.Location.X, currentY);
 
-            // Store the DataGridView in the dictionary
             detailGrids[rowIndex] = detailDataGridView;
 
             if (visible)
@@ -382,15 +382,15 @@ namespace BP_rizeni_zakazek
                                     {
                                         foundMatch = true;
                                         string originalPocet = detail[5]; // Původní počet kusů
-                                        string stav = DetermineOrderStatus(vyrobeno, originalPocet, ohyb);
+                                        string novyStavObjednavky = DetermineOrderStatus(vyrobeno, originalPocet, ohyb);
 
                                         Debug.WriteLine(
-                                            $"Nalezeno: {cestaKSouboru}, Original: {originalPocet}, Stav: {stav}");
+                                            $"Nalezeno: {cestaKSouboru}, Original: {originalPocet}, Stav: {novyStavObjednavky}");
 
 
                                         // Aktualizujte detail
                                         detail[8] = vyrobeno; // Aktualizace vyrobeného množství
-                                        detail[9] = stav; // Aktualizace stavu objednávky
+                                        detail[9] = novyStavObjednavky; // Aktualizace stavu objednávky
 
                                         // Aktualizujte příslušný řádek v DetailGrid
                                         UpdateDetailGridRow(masterRow.Index, detail);
@@ -407,7 +407,117 @@ namespace BP_rizeni_zakazek
                     }
                 }
             }
+            UpdateAllMasterGridRowStatuses();
         }
+
+        private void UpdateAllMasterGridRowStatuses()
+        {
+            Debug.WriteLine("Aktualizace stavů pro všechny řádky v masterGridu");
+            foreach (DataGridViewRow masterRow in dataGridViewMaster.Rows)
+            {
+                if (masterRow.IsNewRow) continue;
+
+                string overallStatus = CalculateOverallStatus(masterRow);
+                Debug.WriteLine($"Řádek {masterRow.Index}: Celkový stav = {overallStatus}");
+                masterRow.Cells["stateOfOrder"].Value = overallStatus;
+            }
+        }
+
+        private string CalculateOverallStatus(DataGridViewRow masterRow)
+        {
+            if (masterRow.Tag is List<string[]> detailsList)
+            {
+                bool anyInProgressOrComplete = false;
+                bool allDone = true;
+
+                foreach (var detail in detailsList)
+                {
+                    string status = detail[9];
+
+                    if (status.Equals("Hotovo", StringComparison.OrdinalIgnoreCase))
+                    {
+                        anyInProgressOrComplete = true; // alespoň jeden stav "Hotovo"
+                    }
+                    else
+                    {
+                        allDone = false; 
+                        if (status.Equals("Rozpracovano", StringComparison.OrdinalIgnoreCase) ||
+                            status.Equals("Hotovo", StringComparison.OrdinalIgnoreCase))
+                        {
+                            anyInProgressOrComplete = true; // alespoň jeden "Rozpracovano" nebo "Hotovo"
+                        }
+                    }
+                }
+
+                string resultStatus;
+
+                if (allDone)
+                {
+                    resultStatus = "Hotovo";
+                }
+                else if (anyInProgressOrComplete)
+                {
+                    resultStatus = "Rozpracovano";
+                }
+                else
+                {
+                    resultStatus = "Nezadáno";
+                }
+
+                DataGridViewCell statusCell = masterRow.Cells["StateOfOrder"];
+                SetOrderCellColor(statusCell, resultStatus);
+                UpdateDateOfFinish(masterRow, resultStatus);
+                int dateColIndex = dataGridViewMaster.Columns["Date"].Index;
+                HighlightOverdueDates(masterRow, dateColIndex);
+                return resultStatus;
+
+            }
+
+            return "Neznámý";
+        }
+
+        private void SetOrderCellColor(DataGridViewCell cell, string status)
+        {
+            Color color;
+            switch (status)
+            {
+                case "Hotovo":
+                    color = Color.Green;
+                    break;
+                case "Rozpracovano":
+                    color = Color.Yellow;
+                    break;
+                case "Nezadáno":
+                    color = Color.LightBlue;
+                    break;
+                default:
+                    color = Color.Red;
+                    break;
+            }
+
+            cell.Style.BackColor = color;
+        }
+
+        private void UpdateDateOfFinish(DataGridViewRow row, string status)
+        {
+            if (status == "Hotovo")
+            {
+                string formattedDate = DateTime.Now.ToString("dd/MM/yyyy");
+                row.Cells["dateOfFinish"].Value = formattedDate;
+            }
+        }
+
+        private void HighlightOverdueDates(DataGridViewRow row, int dateColumnIndex)
+        {
+            if (DateTime.TryParse(row.Cells[dateColumnIndex].Value?.ToString(), out DateTime cellDate))
+            {
+                if (cellDate < DateTime.Now.Date)
+                {
+                    row.Cells[dateColumnIndex].Style.BackColor = Color.Red;
+                }
+            }
+        }
+
 
         private void VypisHodnotyCestaKSouboruZDetailGrid(DataGridViewRow masterRow)
         {
@@ -456,27 +566,36 @@ namespace BP_rizeni_zakazek
         {
             if (detailGrids.TryGetValue(masterRowIndex, out var detailGrid))
             {
+                Debug.WriteLine($"DetailGrid pro MasterGrid řádek {masterRowIndex} byl nalezen.");
+
                 string cestaKSouboru = detail[7].Trim();
 
                 foreach (DataGridViewRow row in detailGrid.Rows)
                 {
+                    //if (row.IsNewRow) continue;
+                    string status = row.Cells["stavObjednavky"].Value?.ToString();
+                    Debug.WriteLine($"Řádek {row.Index}, Stav: {status}");
+
                     if (row.Cells["cestaKSouboru"].Value?.ToString().Trim() == cestaKSouboru)
                     {
-                        row.Cells["vyrobeno"].Value =
-                            detail
-                                [8];
-                        row.Cells["stavObjednavky"].Value =
-                            detail
-                                [9];
+                        row.Cells["vyrobeno"].Value = detail[8];
+                        row.Cells["stavObjednavky"].Value = detail[9];
 
                         Debug.WriteLine(
                             $"Aktualizace řádku {masterRowIndex} pro {cestaKSouboru}: Vyrobeno = {detail[8]}, Stav = {detail[9]}");
 
-                        break;
+                        // Po aktualizaci jednoho řádku se nemusí pokračovat v iteraci, pokud je 'cestaKSouboru' unikátní pro každý řádek.
+                        // break;
                     }
                 }
 
                 detailGrid.Refresh();
+                Debug.WriteLine($"Vytvoření DetailGrid pro MasterGrid řádek {masterRowIndex}");
+            }
+            else
+            {
+                Debug.WriteLine($"DetailGrid pro MasterGrid řádek {masterRowIndex} nebyl nalezen.");
+
             }
         }
 
@@ -498,8 +617,8 @@ namespace BP_rizeni_zakazek
         {
             switch (status.ToLower())
             {
-                case "nehotovo":
-                    return Color.Gray;
+                case "neznámý":
+                    return Color.LightGray;
                 case "rozpracovano":
                     return Color.Yellow;
                 case "hotovo":
