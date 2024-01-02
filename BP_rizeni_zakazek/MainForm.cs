@@ -122,6 +122,9 @@ namespace BP_rizeni_zakazek
             BtnSettings.BackColor = Color.FromArgb(24, 30, 54);
         }
 
+        /// <summary>
+        /// Metoda pro inicializaci masterGridu
+        /// </summary>
         private void InitializeDataGridViewMaster()
         {
             if (!dataGridViewMaster.Columns.Contains("ExpandDetails"))
@@ -136,7 +139,11 @@ namespace BP_rizeni_zakazek
             }
         }
 
-
+        /// <summary>
+        /// Metoda pro nahrání vstupního CSV a vytvoření řádků v masterGridu
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void BtnUpload_Click(object sender, EventArgs e)
         {
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
@@ -182,6 +189,13 @@ namespace BP_rizeni_zakazek
 
         }
 
+        /// <summary>
+        /// Metoda pro ověření existence řádku v masterGridu - zabraňuje duplicitám
+        /// </summary>
+        /// <param name="customer"></param>
+        /// <param name="orderNumber"></param>
+        /// <param name="date"></param>
+        /// <returns></returns>
         private bool RowExists(string customer, string orderNumber, string date)
         {
             foreach (DataGridViewRow row in dataGridViewMaster.Rows)
@@ -201,7 +215,14 @@ namespace BP_rizeni_zakazek
             return false;
         }
 
-
+        /// <summary>
+        /// Metoda pro přidání detailních informací do existujícího řádku
+        /// </summary>
+        /// <param name="customer"></param>
+        /// <param name="orderNumber"></param>
+        /// <param name="date"></param>
+        /// <param name="details"></param>
+        /// <returns></returns>
         private int AddDetailsToExistingRow(string customer, string orderNumber, string date, string[] details)
         {
             foreach (DataGridViewRow row in dataGridViewMaster.Rows)
@@ -219,7 +240,11 @@ namespace BP_rizeni_zakazek
             return -1;
         }
 
-
+        /// <summary>
+        /// Metoda pro rozbalení DetailGridu
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void dataGridViewMaster_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0 && dataGridViewMaster.Columns[e.ColumnIndex].Name == "ExpandDetails")
@@ -239,16 +264,20 @@ namespace BP_rizeni_zakazek
             }
         }
 
+        /// <summary>
+        /// Metoda pro vytvoření DetailGridu
+        /// </summary>
+        /// <param name="rowIndex"></param>
+        /// <param name="detailsList"></param>
+        /// <param name="visible"></param>
         private void CreateAndShowDetailDataGridView(int rowIndex, List<string[]> detailsList, bool visible)
         {
-            // Dispose of the existing detail DataGridView if it exists
             if (detailGrids.TryGetValue(rowIndex, out var existingDetailGrid))
             {
                 existingDetailGrid.Dispose();
                 detailGrids.Remove(rowIndex);
             }
 
-            // Create a new DataGridView for showing details
             var detailDataGridView = new DataGridView
             {
                 AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
@@ -280,10 +309,8 @@ namespace BP_rizeni_zakazek
                 RowHeadersVisible = false
             };
 
-            // Match the width of the master DataGridView
             detailDataGridView.Width = dataGridViewMaster.Width;
 
-            // Add columns to the detail DataGridView (adjust the column names as necessary)
             detailDataGridView.Columns.Add("nazev", "Název");
             detailDataGridView.Columns.Add("material", "Materiál");
             detailDataGridView.Columns.Add("tloustka", "Tloušťka");
@@ -303,7 +330,6 @@ namespace BP_rizeni_zakazek
             foreach (var detail in detailsList)
             {
                 //detailDataGridView.Rows.Add(detail.Skip(2).Take(detailDataGridView.Columns.Count).ToArray());
-                Debug.WriteLine(string.Join(", ", detail));
 
                 int detailIndex = detailDataGridView.Rows.Add(detail.Skip(2).Take(detailDataGridView.Columns.Count).ToArray());
                 string stavObjednavky = string.IsNullOrEmpty(detail[9]) ? "Neznámý" : detail[9];
@@ -331,21 +357,27 @@ namespace BP_rizeni_zakazek
             }
         }
 
+        /// <summary>
+        /// Metoda pro zrušení DetailGridu
+        /// </summary>
+        /// <param name="masterRowIndex"></param>
         private void DisposeDetailDataGridView(int masterRowIndex)
         {
-            // Find and dispose the detail Panel associated with the master row index
             if (detailGrids.TryGetValue(masterRowIndex, out var detailPanel))
             {
                 Controls.Remove(detailPanel);
                 detailPanel.Dispose();
                 detailGrids.Remove(masterRowIndex);
 
-                // Update the button text to indicate expansion
                 dataGridViewMaster.Rows[masterRowIndex].Cells["ExpandDetails"].Value = "+";
             }
         }
 
-        // V této metodě nahrajeme výstupní CSV a aktualizujeme stav zakázek
+        /// <summary>
+        /// Metoda pro nahrání výstupního CSV a aktualizaci stavu zakázek v detailGridu
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void BtnUploadHot_Click(object sender, EventArgs e)
         {
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
@@ -371,35 +403,27 @@ namespace BP_rizeni_zakazek
                                 string ohyb = fields[7].Trim(); // 7. sloupec v CSV
                                 string vyrobeno = fields[5].Trim(); // 6. sloupec v CSV
 
-                                Debug.WriteLine($"Hledání: {cestaKSouboru}, Vyrobeno: {vyrobeno}");
 
                                 bool foundMatch = false;
 
                                 foreach (var detail in detailsList)
                                 {
-                                    Debug.WriteLine($"Detail: {string.Join(", ", detail.Select(d => d.Trim()))}");
                                     if (detail[7].Trim() == cestaKSouboru)
                                     {
                                         foundMatch = true;
-                                        string originalPocet = detail[5]; // Původní počet kusů
+                                        string originalPocet = detail[5];
                                         string novyStavObjednavky = DetermineOrderStatus(vyrobeno, originalPocet, ohyb);
 
-                                        Debug.WriteLine(
-                                            $"Nalezeno: {cestaKSouboru}, Original: {originalPocet}, Stav: {novyStavObjednavky}");
+                                        // Aktualizace
+                                        detail[8] = vyrobeno;
+                                        detail[9] = novyStavObjednavky;
 
-
-                                        // Aktualizujte detail
-                                        detail[8] = vyrobeno; // Aktualizace vyrobeného množství
-                                        detail[9] = novyStavObjednavky; // Aktualizace stavu objednávky
-
-                                        // Aktualizujte příslušný řádek v DetailGrid
                                         UpdateDetailGridRow(masterRow.Index, detail);
                                     }
                                 }
 
                                 if (!foundMatch)
                                 {
-                                    Debug.WriteLine($"Nenalezena shoda pro: {cestaKSouboru}");
                                     VypisHodnotyCestaKSouboruZDetailGrid(masterRow);
                                 }
                             }
@@ -410,19 +434,25 @@ namespace BP_rizeni_zakazek
             UpdateAllMasterGridRowStatuses();
         }
 
+        /// <summary>
+        /// Metoda pro aktualizaci celkového stavu zakázky
+        /// </summary>
         private void UpdateAllMasterGridRowStatuses()
         {
-            Debug.WriteLine("Aktualizace stavů pro všechny řádky v masterGridu");
             foreach (DataGridViewRow masterRow in dataGridViewMaster.Rows)
             {
                 if (masterRow.IsNewRow) continue;
 
                 string overallStatus = CalculateOverallStatus(masterRow);
-                Debug.WriteLine($"Řádek {masterRow.Index}: Celkový stav = {overallStatus}");
                 masterRow.Cells["stateOfOrder"].Value = overallStatus;
             }
         }
 
+        /// <summary>
+        /// Metoda pro určení celkového stavu zakázky
+        /// </summary>
+        /// <param name="masterRow"></param>
+        /// <returns></returns>
         private string CalculateOverallStatus(DataGridViewRow masterRow)
         {
             if (masterRow.Tag is List<string[]> detailsList)
@@ -476,6 +506,11 @@ namespace BP_rizeni_zakazek
             return "Neznámý";
         }
 
+        /// <summary>
+        /// Metoda pro nastavení barvy buňky dle stavu objednávky
+        /// </summary>
+        /// <param name="cell"></param>
+        /// <param name="status"></param>
         private void SetOrderCellColor(DataGridViewCell cell, string status)
         {
             Color color;
@@ -498,6 +533,11 @@ namespace BP_rizeni_zakazek
             cell.Style.BackColor = color;
         }
 
+        /// <summary>
+        /// Metoda pro aktualizaci datumu dle dokončení zakázky
+        /// </summary>
+        /// <param name="row"></param>
+        /// <param name="status"></param>
         private void UpdateDateOfFinish(DataGridViewRow row, string status)
         {
             if (status == "Hotovo")
@@ -507,6 +547,11 @@ namespace BP_rizeni_zakazek
             }
         }
 
+        /// <summary>
+        /// Metoda pro barevných zvýraznění překročených termínů dle datumu v masterGridu
+        /// </summary>
+        /// <param name="row"></param>
+        /// <param name="dateColumnIndex"></param>
         private void HighlightOverdueDates(DataGridViewRow row, int dateColumnIndex)
         {
             if (DateTime.TryParse(row.Cells[dateColumnIndex].Value?.ToString(), out DateTime cellDate))
@@ -518,7 +563,10 @@ namespace BP_rizeni_zakazek
             }
         }
 
-
+        /// <summary>
+        /// Metoda pro výpis hodnoty 'cestaKSouboru' z DetailGrid
+        /// </summary>
+        /// <param name="masterRow"></param>
         private void VypisHodnotyCestaKSouboruZDetailGrid(DataGridViewRow masterRow)
         {
             if (detailGrids.TryGetValue(masterRow.Index, out var detailGrid))
@@ -526,23 +574,25 @@ namespace BP_rizeni_zakazek
                 foreach (DataGridViewRow row in detailGrid.Rows)
                 {
                     string cestaVDetailGrid = row.Cells["cestaKSouboru"].Value?.ToString() ?? "";
-                    Debug.WriteLine($"Hodnota v DetailGrid 'cestaKSouboru': {cestaVDetailGrid}");
                 }
             }
         }
 
+        /// <summary>
+        /// Metoda pro určení stavu objednávky
+        /// </summary>
+        /// <param name="vyrobeno"></param>
+        /// <param name="originalPocet"></param>
+        /// <param name="ohyb"></param>
+        /// <returns></returns>
         private string DetermineOrderStatus(string vyrobeno, string originalPocet, String ohyb)
         {
             bool parseVyrobeno = int.TryParse(vyrobeno, out int numVyrobeno);
             bool parseOriginalPocet = int.TryParse(originalPocet, out int numOriginalPocet);
 
-            Debug.WriteLine($"\nDetermineOrderStatus - Vyrobeno: {vyrobeno}, OriginalPocet: {originalPocet}, Ohyb: {ohyb}\n");
-            Debug.WriteLine($"\nParsed Vyrobeno: {numVyrobeno}, Parsed OriginalPocet: {numOriginalPocet}\n");
 
             if (!parseVyrobeno || !parseOriginalPocet)
             {
-                Debug.WriteLine("Nepodařilo se zpracovat čísla pro vyrobeno nebo originalPocet.");
-
                 return "chyba přev";
             }
 
@@ -562,27 +612,26 @@ namespace BP_rizeni_zakazek
             return "Nehotovo";
         }
 
+        /// <summary>
+        /// Metoda pro aktualizaci DetailGrid řádku
+        /// </summary>
+        /// <param name="masterRowIndex"></param>
+        /// <param name="detail"></param>
         private void UpdateDetailGridRow(int masterRowIndex, string[] detail)
         {
             if (detailGrids.TryGetValue(masterRowIndex, out var detailGrid))
             {
-                Debug.WriteLine($"DetailGrid pro MasterGrid řádek {masterRowIndex} byl nalezen.");
-
                 string cestaKSouboru = detail[7].Trim();
 
                 foreach (DataGridViewRow row in detailGrid.Rows)
                 {
                     //if (row.IsNewRow) continue;
                     string status = row.Cells["stavObjednavky"].Value?.ToString();
-                    Debug.WriteLine($"Řádek {row.Index}, Stav: {status}");
 
                     if (row.Cells["cestaKSouboru"].Value?.ToString().Trim() == cestaKSouboru)
                     {
                         row.Cells["vyrobeno"].Value = detail[8];
                         row.Cells["stavObjednavky"].Value = detail[9];
-
-                        Debug.WriteLine(
-                            $"Aktualizace řádku {masterRowIndex} pro {cestaKSouboru}: Vyrobeno = {detail[8]}, Stav = {detail[9]}");
 
                         // Po aktualizaci jednoho řádku se nemusí pokračovat v iteraci, pokud je 'cestaKSouboru' unikátní pro každý řádek.
                         // break;
@@ -590,16 +639,14 @@ namespace BP_rizeni_zakazek
                 }
 
                 detailGrid.Refresh();
-                Debug.WriteLine($"Vytvoření DetailGrid pro MasterGrid řádek {masterRowIndex}");
-            }
-            else
-            {
-                Debug.WriteLine($"DetailGrid pro MasterGrid řádek {masterRowIndex} nebyl nalezen.");
-
             }
         }
 
-
+        /// <summary>
+        /// Metoda pro zbarvení buňky dle stavu položky v zakázce
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void DetailDataGridView_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
             DataGridView detailGridView = sender as DataGridView;
@@ -612,7 +659,11 @@ namespace BP_rizeni_zakazek
             }
         }
 
-        // Metoda pro získání barvy podle stavu
+        /// <summary>
+        /// Metoda pro získání barvy podle stavu
+        /// </summary>
+        /// <param name="status"></param>
+        /// <returns></returns>
         private Color GetColorForStatus(string status)
         {
             switch (status.ToLower())
