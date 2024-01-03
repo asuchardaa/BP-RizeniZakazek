@@ -25,6 +25,7 @@ namespace BP_rizeni_zakazek
         );
 
         private Dictionary<int, DataGridView> detailGrids = new Dictionary<int, DataGridView>();
+        private HashSet<string> nacteneSoubory = new HashSet<string>();
 
 
         public MainForm()
@@ -140,10 +141,23 @@ namespace BP_rizeni_zakazek
                 expandColumn.HeaderText = "";
                 expandColumn.Name = "ExpandDetails";
                 // Removed the Text property assignment
-                expandColumn.UseColumnTextForButtonValue = false; // Set to false
+                expandColumn.UseColumnTextForButtonValue = false;
                 expandColumn.Width = 40;
                 dataGridViewMaster.Columns.Insert(0, expandColumn);
             }
+
+            dataGridViewMaster.AlternatingRowsDefaultCellStyle.BackColor = Color.LightGray;
+            dataGridViewMaster.ColumnHeadersDefaultCellStyle.BackColor = Color.Navy;
+            dataGridViewMaster.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
+            dataGridViewMaster.EnableHeadersVisualStyles = false;
+            dataGridViewMaster.DefaultCellStyle.Font = new Font("Arial", 10);
+            dataGridViewMaster.RowTemplate.Height = 30;
+            dataGridViewMaster.ScrollBars = ScrollBars.Both;
+            dataGridViewMaster.GridColor = Color.DarkGray;
+            dataGridViewMaster.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            dataGridViewMaster.DefaultCellStyle.SelectionBackColor = Color.DeepSkyBlue;
+            dataGridViewMaster.DefaultCellStyle.SelectionForeColor = Color.White;
+            dataGridViewMaster.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         }
 
 
@@ -164,6 +178,32 @@ namespace BP_rizeni_zakazek
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
                     var filePath = openFileDialog.FileName;
+
+                    // Kontrola duplicity
+                    if (JeSouborJizNacten(filePath))
+                    {
+                        DialogResult dialogResult = MessageBox.Show(
+                            "Tento soubor již byl nahrán. Chcete jej nahrát znovu a přepsat existující data?",
+                            "Duplicitní soubor", MessageBoxButtons.YesNo);
+
+                        if (dialogResult == DialogResult.Yes)
+                        {
+                            string cisloObjednavky = NajitCisloObjednavkyCSV(filePath);
+                            if (cisloObjednavky != null)
+                            {
+                                OdstranitSpecifickyRadek(cisloObjednavky);
+                            }
+                        }
+                        else
+                        {
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        nacteneSoubory.Add(filePath);
+                    }
+
                     string[] lines = File.ReadAllLines(filePath, Encoding.UTF8);
 
                     if (lines.Length > 1)
@@ -196,6 +236,44 @@ namespace BP_rizeni_zakazek
 
             UpdateAllMasterGridRowStatuses();
         }
+
+        /// <summary>
+        /// Metoda pro odstranění specifického řádku z masterGridu
+        /// </summary>
+        /// <param name="cisloObjednavky"></param>
+        private void OdstranitSpecifickyRadek(string cisloObjednavky)
+        {
+            foreach (DataGridViewRow row in dataGridViewMaster.Rows)
+            {
+                if (!row.IsNewRow && row.Cells["NumOfOrder"].Value.ToString() == cisloObjednavky)
+                {
+                    dataGridViewMaster.Rows.Remove(row);
+                    break; 
+                }
+            }
+        }
+
+        /// <summary>
+        /// Metoda pro nalezení čísla objednávky v CSV pro kontrolu duplicity při nahrávání
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        private bool JeSouborJizNacten(string filePath)
+        {
+            return nacteneSoubory.Contains(filePath);
+        }
+
+        private string NajitCisloObjednavkyCSV(string filePath)
+        {
+            string[] lines = File.ReadAllLines(filePath, Encoding.UTF8);
+            if (lines.Length > 1)
+            {
+                string[] fields = lines[1].Split(';');
+                return fields[1].Trim();
+            }
+            return null;
+        }
+
 
         /// <summary>
         /// Metoda pro ověření existence řádku v masterGridu - zabraňuje duplicitám
@@ -275,7 +353,7 @@ namespace BP_rizeni_zakazek
                     }
                 }
 
-                dataGridViewMaster.InvalidateRow(e.RowIndex); // Forces the row to redraw
+                dataGridViewMaster.InvalidateRow(e.RowIndex);
             }
         }
 
@@ -318,11 +396,14 @@ namespace BP_rizeni_zakazek
                 },
                 AlternatingRowsDefaultCellStyle = new DataGridViewCellStyle
                 {
-                    BackColor = Color.WhiteSmoke
+                    BackColor = Color.LightGray
                 },
-                GridColor = Color.Gainsboro,
+                GridColor = Color.DarkGray,
                 RowHeadersVisible = false
             };
+            detailDataGridView.RowTemplate.Height = 30;
+            detailDataGridView.ScrollBars = ScrollBars.Both;
+            detailDataGridView.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
 
             detailDataGridView.Width = dataGridViewMaster.Width;
 
