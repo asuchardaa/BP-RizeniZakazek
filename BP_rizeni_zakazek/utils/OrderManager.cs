@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BP_rizeni_zakazek
+namespace BP_rizeni_zakazek.utils
 {
     internal class OrderManager
     {
@@ -129,7 +129,7 @@ namespace BP_rizeni_zakazek
         /// <param name="originalPocet"></param>
         /// <param name="ohyb"></param>
         /// <returns></returns>
-        public string DetermineOrderStatus(string vyrobeno, string originalPocet, String ohyb)
+        public string DetermineOrderStatus(string vyrobeno, string originalPocet, string ohyb)
         {
             bool parseVyrobeno = int.TryParse(vyrobeno, out int numVyrobeno);
             bool parseOriginalPocet = int.TryParse(originalPocet, out int numOriginalPocet);

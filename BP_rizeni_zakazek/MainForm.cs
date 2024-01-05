@@ -4,6 +4,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.Text;
 using System.Runtime.InteropServices;
+using BP_rizeni_zakazek.utils;
 
 namespace BP_rizeni_zakazek
 

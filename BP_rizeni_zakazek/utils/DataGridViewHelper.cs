@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BP_rizeni_zakazek
+namespace BP_rizeni_zakazek.utils
 {
     internal class DataGridViewHelper
     {
