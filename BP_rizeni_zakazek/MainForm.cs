@@ -4,9 +4,6 @@ using System.Windows.Forms;
 using System.IO;
 using System.Text;
 using System.Runtime.InteropServices;
-using System.Diagnostics;
-using Timer = System.Windows.Forms.Timer;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace BP_rizeni_zakazek
 
@@ -24,8 +21,11 @@ namespace BP_rizeni_zakazek
             int nHeightEllipse
         );
 
+        private CSVManager _csvManager = new CSVManager();
+        private DataGridViewHelper _dataGridViewHelper = new DataGridViewHelper();
+        private OrderManager _orderManager = new OrderManager();
+
         private Dictionary<int, DataGridView> detailGrids = new Dictionary<int, DataGridView>();
-        private HashSet<string> nacteneSoubory = new HashSet<string>();
 
 
         public MainForm()
@@ -40,8 +40,14 @@ namespace BP_rizeni_zakazek
                 new DataGridViewCellEventHandler(dataGridViewMaster_CellContentClick);
             InitializeDataGridViewMaster();
             this.Load += new System.EventHandler(this.Form1_Load);
+            //settingsPanel.Visible = false;
         }
 
+        /// <summary>
+        /// Metoda pro defaultní nastavení Formuláře, tohle nastavuje parametry do filtru
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Form1_Load(object sender, EventArgs e)
         {
             OrderDoneOrNotDone.Items.Clear();
@@ -51,6 +57,9 @@ namespace BP_rizeni_zakazek
             OrderDoneOrNotDone.SelectedIndex = 0;
         }
 
+        /// <summary>
+        /// Metoda pro reset barvy tlačítek v navigačním panelu
+        /// </summary>
         private void ResetButtonColors()
         {
             BtnDashboard.BackColor = Color.FromArgb(24, 30, 54);
@@ -60,6 +69,11 @@ namespace BP_rizeni_zakazek
             BtnSettings.BackColor = Color.FromArgb(24, 30, 54);
         }
 
+        /// <summary>
+        /// Metoda pro zobrazení efektu při najetí na tlačítko Dashboard
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void BtnDashboard_Click(object sender, EventArgs e)
         {
             ResetButtonColors();
@@ -69,6 +83,11 @@ namespace BP_rizeni_zakazek
             BtnDashboard.BackColor = Color.FromArgb(46, 51, 73);
         }
 
+        /// <summary>
+        /// Metoda pro zobrazení efektu při najetí na tlačítko Statistics
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void BtnStatistics_Click(object sender, EventArgs e)
         {
             ResetButtonColors();
@@ -78,6 +97,11 @@ namespace BP_rizeni_zakazek
             BtnStatistics.BackColor = Color.FromArgb(46, 51, 73);
         }
 
+        /// <summary>
+        /// Metoda pro zobrazení efektu při najetí na tlačítko Calender
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void BtnCalender_Click(object sender, EventArgs e)
         {
             ResetButtonColors();
@@ -87,6 +111,11 @@ namespace BP_rizeni_zakazek
             BtnCalender.BackColor = Color.FromArgb(46, 51, 73);
         }
 
+        /// <summary>
+        /// Metoda pro zobrazení efektu při najetí na tlačítko Archive
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void BtnArchive_Click(object sender, EventArgs e)
         {
             ResetButtonColors();
@@ -96,6 +125,11 @@ namespace BP_rizeni_zakazek
             BtnArchive.BackColor = Color.FromArgb(46, 51, 73);
         }
 
+        /// <summary>
+        /// Metoda pro nastavení efektu při najetí na tlačítko Settings
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void BtnSettings_Click(object sender, EventArgs e)
         {
             ResetButtonColors();
@@ -105,29 +139,102 @@ namespace BP_rizeni_zakazek
             BtnSettings.BackColor = Color.FromArgb(46, 51, 73);
         }
 
+        /// <summary>
+        /// Metoda pro zobrazení efektu při najetí na tlačítko Dashboard
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void BtnDashboard_Leave(object sender, EventArgs e)
         {
             BtnDashboard.BackColor = Color.FromArgb(24, 30, 54);
         }
 
+        /// <summary>
+        /// Metoda pro zobrazení efektu při odchodu z tlačítka Statistics
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void BtnStatistics_Leave(object sender, EventArgs e)
         {
             BtnStatistics.BackColor = Color.FromArgb(24, 30, 54);
         }
 
+        /// <summary>
+        /// Metoda pro zobrazení efektu při odchodu z tlačítka Calender
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void BtnCalender_Leave(object sender, EventArgs e)
         {
             BtnCalender.BackColor = Color.FromArgb(24, 30, 54);
         }
 
+        /// <summary>
+        /// Metoda pro zobrazení efektu při odchodu z tlačítka Archive
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void BtnArchive_Leave(object sender, EventArgs e)
         {
             BtnArchive.BackColor = Color.FromArgb(24, 30, 54);
         }
 
+        /// <summary>
+        /// Metoda pro zobrazení efektu při odchodu z tlačítka Settings
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void BtnSettings_Leave(object sender, EventArgs e)
         {
             BtnSettings.BackColor = Color.FromArgb(24, 30, 54);
+        }
+
+        /// <summary>
+        /// Metoda pro aplikaci filtru na textBox pro vyhledávání zákazníka a čísla zakázky
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void FilterTextBox_TextChanged(object sender, EventArgs e)
+        {
+            ApplyFilter();
+        }
+
+        /// <summary>
+        /// Metoda pro aplikaci filtru na comboBox s hotovo/rozpracováno/vše
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void comboBox1_OrderDoneOrNotDone(object sender, EventArgs e)
+        {
+            ApplyFilter();
+        }
+
+        /// <summary>
+        /// Metoda pro aplikaci filtru na masterGrid
+        /// </summary>
+        private void ApplyFilter()
+        {
+            string searchText = FilterTextBox.Text.ToLower();
+            string selectedStatus = OrderDoneOrNotDone.SelectedItem.ToString();
+
+            foreach (DataGridViewRow row in dataGridViewMaster.Rows)
+            {
+                bool textMatches = row.Cells["Customer"].Value.ToString().ToLower().Contains(searchText) ||
+                                   row.Cells["NumOfOrder"].Value.ToString().ToLower().Contains(searchText);
+                bool statusMatches;
+
+                if (selectedStatus == "Vše")
+                {
+                    statusMatches = true;
+                }
+                else
+                {
+                    statusMatches = row.Cells["StateOfOrder"].Value.ToString()
+                        .Equals(selectedStatus, StringComparison.OrdinalIgnoreCase);
+                }
+
+                row.Visible = textMatches && statusMatches;
+            }
         }
 
         /// <summary>
@@ -147,11 +254,14 @@ namespace BP_rizeni_zakazek
             }
 
             dataGridViewMaster.AlternatingRowsDefaultCellStyle.BackColor = Color.LightGray;
-            dataGridViewMaster.ColumnHeadersDefaultCellStyle.BackColor = Color.Navy;
+            dataGridViewMaster.ColumnHeadersDefaultCellStyle.BackColor = Color.RoyalBlue;
             dataGridViewMaster.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
+            dataGridViewMaster.ColumnHeadersDefaultCellStyle.Font = new Font("Sans-Serif", 13);
             dataGridViewMaster.EnableHeadersVisualStyles = false;
             dataGridViewMaster.DefaultCellStyle.Font = new Font("Arial", 10);
             dataGridViewMaster.RowTemplate.Height = 30;
+            dataGridViewMaster.ColumnHeadersHeight = 250;
+
             dataGridViewMaster.ScrollBars = ScrollBars.Both;
             dataGridViewMaster.GridColor = Color.DarkGray;
             dataGridViewMaster.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
@@ -180,7 +290,7 @@ namespace BP_rizeni_zakazek
                     var filePath = openFileDialog.FileName;
 
                     // Kontrola duplicity
-                    if (JeSouborJizNacten(filePath))
+                    if (_csvManager.JeSouborJizNacten(filePath))
                     {
                         DialogResult dialogResult = MessageBox.Show(
                             "Tento soubor již byl nahrán. Chcete jej nahrát znovu a přepsat existující data?",
@@ -188,10 +298,10 @@ namespace BP_rizeni_zakazek
 
                         if (dialogResult == DialogResult.Yes)
                         {
-                            string cisloObjednavky = NajitCisloObjednavkyCSV(filePath);
+                            string cisloObjednavky = _csvManager.NajitCisloObjednavkyCSV(filePath);
                             if (cisloObjednavky != null)
                             {
-                                OdstranitSpecifickyRadek(cisloObjednavky);
+                                _dataGridViewHelper.OdstranitSpecifickyRadek(dataGridViewMaster, cisloObjednavky);
                             }
                         }
                         else
@@ -201,7 +311,8 @@ namespace BP_rizeni_zakazek
                     }
                     else
                     {
-                        nacteneSoubory.Add(filePath);
+                        _csvManager.PridatNactenySoubor(filePath);
+                        //nacteneSoubory.Add(filePath);
                     }
 
                     string[] lines = File.ReadAllLines(filePath, Encoding.UTF8);
@@ -213,7 +324,7 @@ namespace BP_rizeni_zakazek
                             string[] fields = line.Split(';');
                             var filteredFields = fields.Where((field, index) => index != 6 && index != 8).ToArray();
 
-                            if (!RowExists(fields[0], fields[1], fields[8]))
+                            if (!_dataGridViewHelper.RowExists(dataGridViewMaster, fields[0], fields[1], fields[8]))
                             {
                                 int rowIndex = dataGridViewMaster.Rows.Add();
                                 dataGridViewMaster.Rows[rowIndex].Cells["Customer"].Value = fields[0].Trim();
@@ -227,103 +338,15 @@ namespace BP_rizeni_zakazek
                             }
                             else
                             {
-                                AddDetailsToExistingRow(fields[0], fields[1], fields[8], filteredFields);
+                                _dataGridViewHelper.AddDetailsToExistingRow(dataGridViewMaster, fields[0], fields[1],
+                                    fields[8], filteredFields);
                             }
                         }
                     }
                 }
             }
 
-            UpdateAllMasterGridRowStatuses();
-        }
-
-        /// <summary>
-        /// Metoda pro odstranění specifického řádku z masterGridu
-        /// </summary>
-        /// <param name="cisloObjednavky"></param>
-        private void OdstranitSpecifickyRadek(string cisloObjednavky)
-        {
-            foreach (DataGridViewRow row in dataGridViewMaster.Rows)
-            {
-                if (!row.IsNewRow && row.Cells["NumOfOrder"].Value.ToString() == cisloObjednavky)
-                {
-                    dataGridViewMaster.Rows.Remove(row);
-                    break; 
-                }
-            }
-        }
-
-        /// <summary>
-        /// Metoda pro nalezení čísla objednávky v CSV pro kontrolu duplicity při nahrávání
-        /// </summary>
-        /// <param name="filePath"></param>
-        /// <returns></returns>
-        private bool JeSouborJizNacten(string filePath)
-        {
-            return nacteneSoubory.Contains(filePath);
-        }
-
-        private string NajitCisloObjednavkyCSV(string filePath)
-        {
-            string[] lines = File.ReadAllLines(filePath, Encoding.UTF8);
-            if (lines.Length > 1)
-            {
-                string[] fields = lines[1].Split(';');
-                return fields[1].Trim();
-            }
-            return null;
-        }
-
-
-        /// <summary>
-        /// Metoda pro ověření existence řádku v masterGridu - zabraňuje duplicitám
-        /// </summary>
-        /// <param name="customer"></param>
-        /// <param name="orderNumber"></param>
-        /// <param name="date"></param>
-        /// <returns></returns>
-        private bool RowExists(string customer, string orderNumber, string date)
-        {
-            foreach (DataGridViewRow row in dataGridViewMaster.Rows)
-            {
-                if (row.IsNewRow) continue;
-
-                var customerCell = row.Cells["Customer"].Value?.ToString() ?? "";
-                var orderNumberCell = row.Cells["NumOfOrder"].Value?.ToString() ?? "";
-                var dateCell = row.Cells["Date"].Value?.ToString() ?? "";
-
-                if (customerCell == customer && orderNumberCell == orderNumber && dateCell == date)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Metoda pro přidání detailních informací do existujícího řádku
-        /// </summary>
-        /// <param name="customer"></param>
-        /// <param name="orderNumber"></param>
-        /// <param name="date"></param>
-        /// <param name="details"></param>
-        /// <returns></returns>
-        private int AddDetailsToExistingRow(string customer, string orderNumber, string date, string[] details)
-        {
-            foreach (DataGridViewRow row in dataGridViewMaster.Rows)
-            {
-                if (row.Cells["Customer"].Value.ToString() == customer &&
-                    row.Cells["NumOfOrder"].Value.ToString() == orderNumber &&
-                    row.Cells["Date"].Value.ToString() == date)
-                {
-                    var detailsList = (List<string[]>)row.Tag;
-                    detailsList.Add(details);
-                    return row.Index;
-                }
-            }
-
-            return -1;
+            _dataGridViewHelper.UpdateAllMasterGridRowStatuses(dataGridViewMaster);
         }
 
         /// <summary>
@@ -509,7 +532,7 @@ namespace BP_rizeni_zakazek
                                     {
                                         foundMatch = true;
                                         string originalPocet = detail[5];
-                                        string novyStavObjednavky = DetermineOrderStatus(vyrobeno, originalPocet, ohyb);
+                                        string novyStavObjednavky = _orderManager.DetermineOrderStatus(vyrobeno, originalPocet, ohyb);
 
                                         // Aktualizace
                                         detail[8] = vyrobeno;
@@ -521,7 +544,13 @@ namespace BP_rizeni_zakazek
 
                                 if (!foundMatch)
                                 {
-                                    VypisHodnotyCestaKSouboruZDetailGrid(masterRow);
+                                    if (detailGrids.TryGetValue(masterRow.Index, out var detailGrid))
+                                    {
+                                        foreach (DataGridViewRow row in detailGrid.Rows)
+                                        {
+                                            string cestaVDetailGrid = row.Cells["cestaKSouboru"].Value?.ToString() ?? "";
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -529,184 +558,7 @@ namespace BP_rizeni_zakazek
                 }
             }
 
-            UpdateAllMasterGridRowStatuses();
-        }
-
-        /// <summary>
-        /// Metoda pro aktualizaci celkového stavu zakázky
-        /// </summary>
-        private void UpdateAllMasterGridRowStatuses()
-        {
-            foreach (DataGridViewRow masterRow in dataGridViewMaster.Rows)
-            {
-                if (masterRow.IsNewRow) continue;
-
-                string overallStatus = CalculateOverallStatus(masterRow);
-                masterRow.Cells["stateOfOrder"].Value = overallStatus;
-            }
-        }
-
-        /// <summary>
-        /// Metoda pro určení celkového stavu zakázky
-        /// </summary>
-        /// <param name="masterRow"></param>
-        /// <returns></returns>
-        private string CalculateOverallStatus(DataGridViewRow masterRow)
-        {
-            if (masterRow.Tag is List<string[]> detailsList)
-            {
-                bool anyInProgressOrComplete = false;
-                bool allDone = true;
-
-                foreach (var detail in detailsList)
-                {
-                    string status = detail[9];
-
-                    if (status.Equals("Hotovo", StringComparison.OrdinalIgnoreCase))
-                    {
-                        anyInProgressOrComplete = true; // alespoň jeden stav "Hotovo"
-                    }
-                    else
-                    {
-                        allDone = false;
-                        if (status.Equals("Rozpracováno", StringComparison.OrdinalIgnoreCase) ||
-                            status.Equals("Hotovo", StringComparison.OrdinalIgnoreCase))
-                        {
-                            anyInProgressOrComplete = true; // alespoň jeden "Rozpracovano" nebo "Hotovo"
-                        }
-                    }
-                }
-
-                string resultStatus;
-
-                if (allDone)
-                {
-                    resultStatus = "Hotovo";
-                }
-                else if (anyInProgressOrComplete)
-                {
-                    resultStatus = "Rozpracováno";
-                }
-                else
-                {
-                    resultStatus = "Nezadáno";
-                }
-
-                DataGridViewCell statusCell = masterRow.Cells["StateOfOrder"];
-                SetOrderCellColor(statusCell, resultStatus);
-                UpdateDateOfFinish(masterRow, resultStatus);
-                int dateColIndex = dataGridViewMaster.Columns["Date"].Index;
-                HighlightOverdueDates(masterRow, dateColIndex);
-                return resultStatus;
-            }
-
-            return "Neznámý";
-        }
-
-        /// <summary>
-        /// Metoda pro nastavení barvy buňky dle stavu objednávky
-        /// </summary>
-        /// <param name="cell"></param>
-        /// <param name="status"></param>
-        private void SetOrderCellColor(DataGridViewCell cell, string status)
-        {
-            Color color;
-            switch (status)
-            {
-                case "Hotovo":
-                    color = Color.Green;
-                    break;
-                case "Rozpracováno":
-                    color = Color.Yellow;
-                    break;
-                case "Nezadáno":
-                    color = Color.LightBlue;
-                    break;
-                default:
-                    color = Color.Red;
-                    break;
-            }
-
-            cell.Style.BackColor = color;
-        }
-
-        /// <summary>
-        /// Metoda pro aktualizaci datumu dle dokončení zakázky
-        /// </summary>
-        /// <param name="row"></param>
-        /// <param name="status"></param>
-        private void UpdateDateOfFinish(DataGridViewRow row, string status)
-        {
-            if (status == "Hotovo")
-            {
-                string formattedDate = DateTime.Now.ToString("dd/MM/yyyy");
-                row.Cells["dateOfFinish"].Value = formattedDate;
-            }
-        }
-
-        /// <summary>
-        /// Metoda pro barevných zvýraznění překročených termínů dle datumu v masterGridu
-        /// </summary>
-        /// <param name="row"></param>
-        /// <param name="dateColumnIndex"></param>
-        private void HighlightOverdueDates(DataGridViewRow row, int dateColumnIndex)
-        {
-            if (DateTime.TryParse(row.Cells[dateColumnIndex].Value?.ToString(), out DateTime cellDate))
-            {
-                if (cellDate < DateTime.Now.Date)
-                {
-                    row.Cells[dateColumnIndex].Style.BackColor = Color.Red;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Metoda pro výpis hodnoty 'cestaKSouboru' z DetailGrid
-        /// </summary>
-        /// <param name="masterRow"></param>
-        private void VypisHodnotyCestaKSouboruZDetailGrid(DataGridViewRow masterRow)
-        {
-            if (detailGrids.TryGetValue(masterRow.Index, out var detailGrid))
-            {
-                foreach (DataGridViewRow row in detailGrid.Rows)
-                {
-                    string cestaVDetailGrid = row.Cells["cestaKSouboru"].Value?.ToString() ?? "";
-                }
-            }
-        }
-
-        /// <summary>
-        /// Metoda pro určení stavu objednávky
-        /// </summary>
-        /// <param name="vyrobeno"></param>
-        /// <param name="originalPocet"></param>
-        /// <param name="ohyb"></param>
-        /// <returns></returns>
-        private string DetermineOrderStatus(string vyrobeno, string originalPocet, String ohyb)
-        {
-            bool parseVyrobeno = int.TryParse(vyrobeno, out int numVyrobeno);
-            bool parseOriginalPocet = int.TryParse(originalPocet, out int numOriginalPocet);
-
-
-            if (!parseVyrobeno || !parseOriginalPocet)
-            {
-                return "chyba přev";
-            }
-
-            if (numVyrobeno == 0)
-            {
-                return "Nehotovo";
-            }
-            else if (numVyrobeno != numOriginalPocet || ohyb.Equals("ANO", StringComparison.OrdinalIgnoreCase))
-            {
-                return "Rozpracováno";
-            }
-            else if (numVyrobeno == numOriginalPocet && ohyb.Equals("NE", StringComparison.OrdinalIgnoreCase))
-            {
-                return "Hotovo";
-            }
-
-            return "Nehotovo";
+            _dataGridViewHelper.UpdateAllMasterGridRowStatuses(dataGridViewMaster);
         }
 
         /// <summary>
@@ -714,7 +566,7 @@ namespace BP_rizeni_zakazek
         /// </summary>
         /// <param name="masterRowIndex"></param>
         /// <param name="detail"></param>
-        private void UpdateDetailGridRow(int masterRowIndex, string[] detail)
+        public void UpdateDetailGridRow(int masterRowIndex, string[] detail)
         {
             if (detailGrids.TryGetValue(masterRowIndex, out var detailGrid))
             {
@@ -752,75 +604,7 @@ namespace BP_rizeni_zakazek
                 e.ColumnIndex == detailGridView.Columns["stavObjednavky"].Index)
             {
                 string stav = (string)detailGridView.Rows[e.RowIndex].Cells["stavObjednavky"].Value;
-                e.CellStyle.BackColor = GetColorForStatus(stav);
-            }
-        }
-
-        /// <summary>
-        /// Metoda pro získání barvy podle stavu
-        /// </summary>
-        /// <param name="status"></param>
-        /// <returns></returns>
-        private Color GetColorForStatus(string status)
-        {
-            switch (status.ToLower())
-            {
-                case "neznámý":
-                    return Color.LightGray;
-                case "rozpracováno":
-                    return Color.Yellow;
-                case "hotovo":
-                    return Color.Green;
-                default:
-                    return Color.White;
-            }
-        }
-
-        /// <summary>
-        /// Metoda pro aplikaci filtru na textBox pro vyhledávání zákazníka a čísla zakázky
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void FilterTextBox_TextChanged(object sender, EventArgs e)
-        {
-            ApplyFilter();
-        }
-
-        /// <summary>
-        /// Metoda pro aplikaci filtru na comboBox s hotovo/rozpracováno/vše
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void comboBox1_OrderDoneOrNotDone(object sender, EventArgs e)
-        {
-            ApplyFilter();
-        }
-
-        /// <summary>
-        /// Metoda pro aplikaci filtru na masterGrid
-        /// </summary>
-        private void ApplyFilter()
-        {
-            string searchText = FilterTextBox.Text.ToLower();
-            string selectedStatus = OrderDoneOrNotDone.SelectedItem.ToString();
-
-            foreach (DataGridViewRow row in dataGridViewMaster.Rows)
-            {
-                bool textMatches = row.Cells["Customer"].Value.ToString().ToLower().Contains(searchText) ||
-                                   row.Cells["NumOfOrder"].Value.ToString().ToLower().Contains(searchText);
-                bool statusMatches;
-
-                if (selectedStatus == "Vše")
-                {
-                    statusMatches = true;
-                }
-                else
-                {
-                    statusMatches = row.Cells["StateOfOrder"].Value.ToString()
-                        .Equals(selectedStatus, StringComparison.OrdinalIgnoreCase);
-                }
-
-                row.Visible = textMatches && statusMatches;
+                e.CellStyle.BackColor = _orderManager.GetColorForStatus(stav);
             }
         }
     }

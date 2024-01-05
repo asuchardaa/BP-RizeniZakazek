@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
             panel1 = new Panel();
             OrderDoneOrNotDone = new ComboBox();
             FilterTextBox = new TextBox();
@@ -272,22 +272,22 @@
             dataGridViewMaster.BackgroundColor = SystemColors.ActiveCaption;
             dataGridViewMaster.BorderStyle = BorderStyle.None;
             dataGridViewMaster.CellBorderStyle = DataGridViewCellBorderStyle.None;
-            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = SystemColors.ButtonShadow;
-            dataGridViewCellStyle2.Font = new Font("Microsoft Sans Serif", 12F, FontStyle.Bold, GraphicsUnit.Point);
-            dataGridViewCellStyle2.ForeColor = SystemColors.WindowText;
-            dataGridViewCellStyle2.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = SystemColors.ControlLightLight;
-            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.True;
-            dataGridViewMaster.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = SystemColors.ButtonShadow;
+            dataGridViewCellStyle1.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            dataGridViewCellStyle1.ForeColor = SystemColors.WindowText;
+            dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = SystemColors.ControlLightLight;
+            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
+            dataGridViewMaster.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dataGridViewMaster.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dataGridViewMaster.Columns.AddRange(new DataGridViewColumn[] { Customer, NumOfOrder, Date, dateOfFinish, stateOfOrder });
             dataGridViewMaster.EnableHeadersVisualStyles = false;
             dataGridViewMaster.GridColor = SystemColors.ScrollBar;
-            dataGridViewMaster.Location = new Point(209, 38);
+            dataGridViewMaster.Location = new Point(224, 20);
             dataGridViewMaster.Name = "dataGridViewMaster";
             dataGridViewMaster.RowTemplate.Height = 25;
-            dataGridViewMaster.Size = new Size(1122, 570);
+            dataGridViewMaster.Size = new Size(1112, 601);
             dataGridViewMaster.TabIndex = 1;
             // 
             // Customer
@@ -358,14 +358,14 @@
         private Panel PnlNav;
         private Panel NavPnl;
         private Button BtnUpload;
-        private DataGridView dataGridViewMaster;
         private Button BtnUploadHot;
+        private ComboBox OrderDoneOrNotDone;
+        private TextBox FilterTextBox;
+        private DataGridView dataGridViewMaster;
         private DataGridViewTextBoxColumn Customer;
         private DataGridViewTextBoxColumn NumOfOrder;
         private DataGridViewTextBoxColumn Date;
         private DataGridViewTextBoxColumn dateOfFinish;
         private DataGridViewTextBoxColumn stateOfOrder;
-        private ComboBox OrderDoneOrNotDone;
-        private TextBox FilterTextBox;
     }
 }
