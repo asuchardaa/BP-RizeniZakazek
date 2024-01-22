@@ -70,7 +70,7 @@ namespace BP_rizeni_zakazek.utils
         /// </summary>
         /// <param name="cell"></param>
         /// <param name="status"></param>
-        private void SetOrderCellColor(DataGridViewCell cell, string status)
+        public void SetOrderCellColor(DataGridViewCell cell, string status)
         {
             Color color;
             switch (status)
@@ -97,7 +97,7 @@ namespace BP_rizeni_zakazek.utils
         /// </summary>
         /// <param name="row"></param>
         /// <param name="status"></param>
-        private void UpdateDateOfFinish(DataGridViewRow row, string status)
+        public void UpdateDateOfFinish(DataGridViewRow row, string status)
         {
             if (status == "Hotovo")
             {
@@ -111,7 +111,7 @@ namespace BP_rizeni_zakazek.utils
         /// </summary>
         /// <param name="row"></param>
         /// <param name="dateColumnIndex"></param>
-        private void HighlightOverdueDates(DataGridViewRow row, int dateColumnIndex)
+        public void HighlightOverdueDates(DataGridViewRow row, int dateColumnIndex)
         {
             if (DateTime.TryParse(row.Cells[dateColumnIndex].Value?.ToString(), out DateTime cellDate))
             {
@@ -140,6 +140,11 @@ namespace BP_rizeni_zakazek.utils
                 return "chyba přev";
             }
 
+            if (string.IsNullOrEmpty(ohyb))
+            {
+                return "Špatně";
+            }
+
             if (numVyrobeno == 0)
             {
                 return "Nehotovo";
@@ -153,7 +158,7 @@ namespace BP_rizeni_zakazek.utils
                 return "Hotovo";
             }
 
-            return "Nehotovo";
+            return "Špatně";
         }
 
         /// <summary>

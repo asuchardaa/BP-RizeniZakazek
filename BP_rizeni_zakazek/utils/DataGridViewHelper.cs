@@ -16,7 +16,7 @@ namespace BP_rizeni_zakazek.utils
         /// </summary>
         /// <param name="gridView"></param>
         /// <param name="cisloObjednavky"></param>
-        public void OdstranitSpecifickyRadek(DataGridView gridView, string cisloObjednavky)
+        public void DeleteSpecifiedRow(DataGridView gridView, string cisloObjednavky)
         {
             foreach (DataGridViewRow row in gridView.Rows)
             {

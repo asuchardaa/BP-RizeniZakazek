@@ -318,7 +318,6 @@
             // 
             stateOfOrder.HeaderText = "Stav";
             stateOfOrder.Name = "stateOfOrder";
-            stateOfOrder.Width = 215;
             // 
             // MainForm
             // 
