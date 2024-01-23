@@ -7,9 +7,6 @@ using System.Text;
 using System.Runtime.InteropServices;
 using BP_rizeni_zakazek.utils;
 using ClosedXML.Excel;
-using DocumentFormat.OpenXml.Spreadsheet;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using ToolTip = System.Windows.Forms.ToolTip;
 
 namespace BP_rizeni_zakazek
 
@@ -480,7 +477,10 @@ namespace BP_rizeni_zakazek
                 AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
                 AllowUserToAddRows = false,
                 ReadOnly = false,
+                AllowUserToResizeRows = false,
+                AllowUserToResizeColumns = false,
 
+                //AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None,
                 BackgroundColor = System.Drawing.Color.FromArgb(153, 180, 209),
                 BorderStyle = BorderStyle.None,
                 SelectionMode = DataGridViewSelectionMode.FullRowSelect,
@@ -519,6 +519,7 @@ namespace BP_rizeni_zakazek
             detailDataGridView.ScrollBars = ScrollBars.Both;
             detailDataGridView.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
             detailDataGridView.Tag = rowIndex;
+            detailDataGridView.CellEndEdit += new DataGridViewCellEventHandler(detailGrid_CellEndEdit);
 
             detailDataGridView.Width = dataGridViewMaster.Width;
 
@@ -892,8 +893,13 @@ namespace BP_rizeni_zakazek
             var detailGrid = sender as DataGridView;
             int masterRowIndex = Convert.ToInt32(detailGrid.Tag);
 
+            Debug.WriteLine($"CellEndEdit: Řádek {e.RowIndex} v detailGridu byl upraven.");
+
             if (masterRowIndex < 0 || masterRowIndex >= dataGridViewMaster.Rows.Count)
+            {
+                Debug.WriteLine("Chyba: Index řádku masterGrid je mimo rozsah.");
                 return;
+            }
 
             var masterRow = dataGridViewMaster.Rows[masterRowIndex];
             if (masterRow.Tag is List<string[]> detailsList && e.RowIndex < detailsList.Count)
@@ -902,8 +908,12 @@ namespace BP_rizeni_zakazek
                 var vyrobeno = detailRow.Cells[6].Value?.ToString();
                 var pocet = detailRow.Cells[3].Value?.ToString();
                 var ohyb = detailRow.Cells[4].Value?.ToString();
+                Debug.WriteLine($"Aktuální data: Vyrobeno = {vyrobeno}, Počet = {pocet}, Ohyb = {ohyb}");
+
 
                 string novyStav = UrčitNovýStav(vyrobeno, pocet, ohyb);
+                Debug.WriteLine($"Nový stav objednávky: {novyStav}");
+
 
                 // Aktualizujte rowData
                 var rowData = detailsList[e.RowIndex];
@@ -917,13 +927,18 @@ namespace BP_rizeni_zakazek
 
                 var celkovýStav = UrčitStavZakázky(detailsList);
                 dataGridViewMaster.Rows[masterRowIndex].Cells["stateOfOrder"].Value = celkovýStav;
+                Debug.WriteLine($"Celkový stav zakázky: {celkovýStav}");
 
                 // Aktualizujte barvu na základě celkového stavu
                 AktualizovatBarvuStavuZakázky(dataGridViewMaster.Rows[masterRowIndex], celkovýStav);
             }
+            else
+            {
+                Debug.WriteLine("Chyba: Řádek detailGrid nebyl nalezen v seznamu detailů.");
 
-            // Volitelně: Uložte změny do CSV nebo jiného úložiště
+            }
         }
+
 
         private void AktualizovatBarvuStavuZakázky(DataGridViewRow masterRow, string stav)
         {
