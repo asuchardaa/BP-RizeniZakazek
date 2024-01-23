@@ -168,6 +168,11 @@ namespace BP_rizeni_zakazek.utils
         /// <returns></returns>
         public Color GetColorForStatus(string status)
         {
+            if (string.IsNullOrEmpty(status))
+            {
+                return Color.White;
+            }
+
             switch (status.ToLower())
             {
                 case "neznámý":

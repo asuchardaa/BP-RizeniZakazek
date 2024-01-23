@@ -17,7 +17,6 @@ namespace BP_rizeni_zakazek.Tests
         private DataGridView _dataGridView;
         private DataGridViewRow _testRow;
         private int _dateColumnIndex;
-        private int _dateOfFinishColumnIndex;
 
         [SetUp]
         public void Setup()
@@ -26,7 +25,6 @@ namespace BP_rizeni_zakazek.Tests
             _dataGridView = new DataGridView();
             _dataGridView.Columns.Add("Date", "Date");
             _dataGridView.Columns.Add("dateOfFinish", "Dokončeno");
-            _dateOfFinishColumnIndex = 1;
             _dateColumnIndex = 0;
 
             _testRow = new DataGridViewRow();

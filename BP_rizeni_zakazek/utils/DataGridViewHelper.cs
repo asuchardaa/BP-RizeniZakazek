@@ -93,6 +93,18 @@ namespace BP_rizeni_zakazek.utils
             }
         }
 
+        public int NajitRowIndexVDetailGrid(DataGridView detailGrid, string cestaKSouboru)
+        {
+            for (int i = 1; i < detailGrid.Rows.Count; i++)
+            {
+                if (detailGrid.Rows[i].Cells["cestaKSouboru"].Value.ToString().Trim() == cestaKSouboru)
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
 
     }
 }

@@ -9,6 +9,7 @@ using BP_rizeni_zakazek.utils;
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using ToolTip = System.Windows.Forms.ToolTip;
 
 namespace BP_rizeni_zakazek
 
@@ -32,6 +33,8 @@ namespace BP_rizeni_zakazek
 
         private Dictionary<int, DataGridView> detailGrids = new Dictionary<int, DataGridView>();
 
+        private Dictionary<string, string> vstupniMaterialy = new Dictionary<string, string>();
+        private Dictionary<string, string> vystupniMaterialy = new Dictionary<string, string>();
 
         public MainForm()
         {
@@ -217,30 +220,33 @@ namespace BP_rizeni_zakazek
         }
 
         /// <summary>
-        /// Metoda pro aplikaci filtru na masterGrid
+        /// Metoda pro aplikaci filtru na masterGrid (zákazník a číslo zakázky) a detailGrid (název položky)
         /// </summary>
         private void ApplyFilter()
         {
             string searchText = FilterTextBox.Text.ToLower();
             string selectedStatus = OrderDoneOrNotDone.SelectedItem.ToString();
 
-            foreach (DataGridViewRow row in dataGridViewMaster.Rows)
+            foreach (DataGridViewRow masterRow in dataGridViewMaster.Rows)
             {
-                bool textMatches = row.Cells["Customer"].Value.ToString().ToLower().Contains(searchText) ||
-                                   row.Cells["NumOfOrder"].Value.ToString().ToLower().Contains(searchText);
-                bool statusMatches;
+                bool textMatches = masterRow.Cells["Customer"].Value.ToString().ToLower().Contains(searchText) ||
+                                   masterRow.Cells["NumOfOrder"].Value.ToString().ToLower().Contains(searchText);
+                bool statusMatches = selectedStatus == "Vše" ||
+                                     masterRow.Cells["stateOfOrder"].Value.ToString().Equals(selectedStatus, StringComparison.OrdinalIgnoreCase);
 
-                if (selectedStatus == "Vše")
+                if (!textMatches && masterRow.Tag is List<string[]> detailsList)
                 {
-                    statusMatches = true;
-                }
-                else
-                {
-                    statusMatches = row.Cells["stateOfOrder"].Value.ToString()
-                        .Equals(selectedStatus, StringComparison.OrdinalIgnoreCase);
+                    foreach (var detail in detailsList)
+                    {
+                        if (detail[2].ToLower().Contains(searchText))
+                        {
+                            textMatches = true;
+                            break;
+                        }
+                    }
                 }
 
-                row.Visible = textMatches && statusMatches;
+                masterRow.Visible = textMatches && statusMatches;
             }
         }
 
@@ -265,9 +271,9 @@ namespace BP_rizeni_zakazek
             {
                 var deleteColumn = new DataGridViewButtonColumn
                 {
-                    HeaderText = "Vymazat",
+                    HeaderText = "Smazat",
                     Name = "DeleteColumn",
-                    Text = "Vymazat",
+                    Text = "Smazat",
                     UseColumnTextForButtonValue = true
                 };
                 dataGridViewMaster.Columns.Add(deleteColumn);
@@ -345,6 +351,10 @@ namespace BP_rizeni_zakazek
                             string[] fields = line.Split(';');
                             var filteredFields = fields.Where((field, index) => index != 6 && index != 8).ToArray();
                             int rowIndex;
+                            string cestaKSouboru = fields[9].Trim();
+                            string material = fields[3].Trim();
+
+                            vstupniMaterialy[cestaKSouboru] = material;
 
                             if (!_dataGridViewHelper.RowExists(dataGridViewMaster, fields[0], fields[1], fields[8]))
                             {
@@ -457,18 +467,21 @@ namespace BP_rizeni_zakazek
         /// <param name="visible"></param>
         private void CreateAndShowDetailDataGridView(int rowIndex, List<string[]> detailsList, bool visible)
         {
+
             if (detailGrids.TryGetValue(rowIndex, out var existingDetailGrid))
             {
                 existingDetailGrid.Dispose();
                 detailGrids.Remove(rowIndex);
             }
 
+
             var detailDataGridView = new DataGridView
             {
                 AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
                 AllowUserToAddRows = false,
                 ReadOnly = false,
-                BackgroundColor = System.Drawing.Color.White,
+
+                BackgroundColor = System.Drawing.Color.FromArgb(153, 180, 209),
                 BorderStyle = BorderStyle.None,
                 SelectionMode = DataGridViewSelectionMode.FullRowSelect,
                 DefaultCellStyle = new DataGridViewCellStyle
@@ -494,10 +507,17 @@ namespace BP_rizeni_zakazek
                 RowHeadersVisible = false
             };
 
+            var deleteButtonColumn = new DataGridViewButtonColumn
+            {
+                HeaderText = "Smazat",
+                Name = "DeleteColumn",
+                Text = "Smazat",
+                UseColumnTextForButtonValue = true
+            };
+
             detailDataGridView.RowTemplate.Height = 30;
             detailDataGridView.ScrollBars = ScrollBars.Both;
             detailDataGridView.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
-            detailDataGridView.CellEndEdit += new DataGridViewCellEventHandler(detailGrid_CellEndEdit);
             detailDataGridView.Tag = rowIndex;
 
             detailDataGridView.Width = dataGridViewMaster.Width;
@@ -511,11 +531,16 @@ namespace BP_rizeni_zakazek
             detailDataGridView.Columns.Add("vyrobeno", "Vyrobeno");
             detailDataGridView.Columns.Add("stavObjednavky", "Stav");
 
+            detailDataGridView.Columns.Add(deleteButtonColumn);
+
             detailDataGridView.Columns["stavObjednavky"].DefaultCellStyle.BackColor = System.Drawing.Color.White;
 
             detailDataGridView.CellFormatting +=
                 new DataGridViewCellFormattingEventHandler(DetailDataGridView_CellFormatting);
             detailDataGridView.Visible = visible;
+            detailDataGridView.CellClick += new DataGridViewCellEventHandler(DetailGrid_CellClick);
+
+
             detailGrids[rowIndex] = detailDataGridView;
 
             foreach (var detail in detailsList)
@@ -546,6 +571,37 @@ namespace BP_rizeni_zakazek
             if (visible)
             {
                 dataGridViewMaster.Rows[rowIndex].Cells["ExpandDetails"].Value = "-";
+            }
+        }
+
+        // Metoda pro zpracování kliknutí na tlačítko v detailGrid
+        private void DetailGrid_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            var grid = sender as DataGridView;
+            if (grid == null || e.RowIndex < 0) return;
+
+            int masterRowIndex = Convert.ToInt32(grid.Tag);
+            var masterRow = dataGridViewMaster.Rows[masterRowIndex];
+
+            if (e.ColumnIndex == grid.Columns["DeleteColumn"].Index)
+            {
+                var nazevPoložky = grid.Rows[e.RowIndex].Cells["nazev"].Value?.ToString() ?? "neznámá položka";
+                var result = MessageBox.Show($"Opravdu chcete smazat položku '{nazevPoložky}'?", "Potvrzení smazání", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+
+                if (result == DialogResult.Yes)
+                {
+                    var detailsList = (List<string[]>)masterRow.Tag;
+
+                    if (e.RowIndex < detailsList.Count)
+                    {
+                        detailsList.RemoveAt(e.RowIndex);
+                        grid.Rows.RemoveAt(e.RowIndex);
+
+                        var celkovýStav = UrčitStavZakázky(detailsList);
+                        masterRow.Cells["stateOfOrder"].Value = celkovýStav;
+                        AktualizovatBarvuStavuZakázky(masterRow, celkovýStav);
+                    }
+                }
             }
         }
 
@@ -594,7 +650,9 @@ namespace BP_rizeni_zakazek
                                 string cestaKSouboru = fields[9].Trim(); // 10. sloupec v CSV
                                 string ohyb = fields[7].Trim(); // 7. sloupec v CSV
                                 string vyrobeno = fields[5].Trim(); // 6. sloupec v CSV
+                                string material = fields[3].Trim();
 
+                                vystupniMaterialy[cestaKSouboru] = material;
 
                                 bool foundMatch = false;
 
@@ -610,6 +668,8 @@ namespace BP_rizeni_zakazek
                                         // Aktualizace
                                         detail[8] = vyrobeno;
                                         detail[9] = novyStavObjednavky;
+
+
 
                                         UpdateDetailGridRow(masterRow.Index, detail);
                                     }
@@ -674,6 +734,23 @@ namespace BP_rizeni_zakazek
         private void DetailDataGridView_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
             DataGridView detailGridView = sender as DataGridView;
+
+            if (e.ColumnIndex < 0 || e.RowIndex < 0)
+                return;
+
+            DataGridViewRow row = detailGridView.Rows[e.RowIndex];
+            DataGridViewCell cell = row.Cells[e.ColumnIndex];
+
+            if (cell.OwningColumn.Name == "material")
+            {
+                string cestaKSouboru = row.Cells["cestaKSouboru"].Value?.ToString();
+                if (vstupniMaterialy.TryGetValue(cestaKSouboru, out string vstupniMaterial) &&
+                    vystupniMaterialy.TryGetValue(cestaKSouboru, out string vystupniMaterial) &&
+                    vstupniMaterial != vystupniMaterial)
+                {
+                    e.CellStyle.BackColor = System.Drawing.Color.DeepPink; // Změna barvy na červenou
+                }
+            }
 
             if (detailGridView.Columns["stavObjednavky"] != null &&
                 e.ColumnIndex == detailGridView.Columns["stavObjednavky"].Index)
