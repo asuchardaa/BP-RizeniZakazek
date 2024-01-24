@@ -8,7 +8,6 @@ namespace BP_rizeni_zakazek.utils
 {
     internal class DataGridViewHelper
     {
-        private Dictionary<int, DataGridView> detailGrids = new Dictionary<int, DataGridView>();
 
         private OrderManager _orderManager = new OrderManager();
         /// <summary>
@@ -26,57 +25,6 @@ namespace BP_rizeni_zakazek.utils
                     break;
                 }
             }
-        }
-
-        /// <summary>
-        /// Metoda pro ověření existence řádku v masterGridu - zabraňuje duplicitám
-        /// </summary>
-        /// <param name="customer"></param>
-        /// <param name="orderNumber"></param>
-        /// <param name="date"></param>
-        /// <returns></returns>
-        public bool RowExists(DataGridView gridView, string customer, string orderNumber, string date)
-        {
-            foreach (DataGridViewRow row in gridView.Rows)
-            {
-                if (row.IsNewRow) continue;
-
-                var customerCell = row.Cells["Customer"].Value?.ToString() ?? "";
-                var orderNumberCell = row.Cells["NumOfOrder"].Value?.ToString() ?? "";
-                var dateCell = row.Cells["Date"].Value?.ToString() ?? "";
-
-                if (customerCell == customer && orderNumberCell == orderNumber && dateCell == date)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Metoda pro přidání detailních informací do existujícího řádku
-        /// </summary>
-        /// <param name="customer"></param>
-        /// <param name="orderNumber"></param>
-        /// <param name="date"></param>
-        /// <param name="details"></param>
-        /// <returns></returns>
-        public int AddDetailsToExistingRow(DataGridView gridView, string customer, string orderNumber, string date, string[] details)
-        {
-            foreach (DataGridViewRow row in gridView.Rows)
-            {
-                if (row.Cells["Customer"].Value.ToString() == customer &&
-                    row.Cells["NumOfOrder"].Value.ToString() == orderNumber &&
-                    row.Cells["Date"].Value.ToString() == date)
-                {
-                    var detailsList = (List<string[]>)row.Tag;
-                    detailsList.Add(details);
-                    return row.Index;
-                }
-            }
-
-            return -1;
         }
 
         /// <summary>

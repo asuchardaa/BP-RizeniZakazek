@@ -9,14 +9,14 @@ namespace BP_rizeni_zakazek.utils
     internal class CSVManager
     {
 
-        private HashSet<string> nacteneSoubory = new HashSet<string>();
+        private HashSet<string> loadedFiles = new HashSet<string>();
 
         /// <summary>
         /// Metoda pro najití čísla objednávky ve vstupním CSV souboru
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns></returns>
-        public string NajitCisloObjednavkyCSV(string filePath)
+        public string FindNumberOfOrder_CSV(string filePath)
         {
             string[] lines = File.ReadAllLines(filePath, Encoding.UTF8);
             if (lines.Length > 1)
@@ -32,18 +32,27 @@ namespace BP_rizeni_zakazek.utils
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns></returns>
-        public bool JeSouborJizNacten(string filePath)
+        public bool isFileLoaded(string filePath)
         {
-            return nacteneSoubory.Contains(filePath);
+            return loadedFiles.Contains(filePath);
         }
 
         /// <summary>
         /// Metoda pro přidání nahrávaného souboru do seznamu nahrátých souborů
         /// </summary>
         /// <param name="filePath"></param>
-        public void PridatNactenySoubor(string filePath)
+        public void AddLoadedFile(string filePath)
         {
-            nacteneSoubory.Add(filePath);
+            loadedFiles.Add(filePath);
+        }
+
+        /// <summary>
+        /// Metoda pro odebrání nahrávaného souboru ze seznamu nahrátých souborů
+        /// </summary>
+        /// <param name="filePath"></param>
+        public void OdebratNactenySoubor(string filePath)
+        {
+            loadedFiles.Remove(filePath);
         }
 
     }

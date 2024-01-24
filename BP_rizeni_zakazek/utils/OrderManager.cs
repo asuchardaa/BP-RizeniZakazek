@@ -125,35 +125,35 @@ namespace BP_rizeni_zakazek.utils
         /// <summary>
         /// Metoda pro určení stavu objednávky
         /// </summary>
-        /// <param name="vyrobeno"></param>
-        /// <param name="originalPocet"></param>
-        /// <param name="ohyb"></param>
+        /// <param name="created"></param>
+        /// <param name="originalAmount"></param>
+        /// <param name="curve"></param>
         /// <returns></returns>
-        public string DetermineOrderStatus(string vyrobeno, string originalPocet, string ohyb)
+        public string DetermineOrderStatus(string created, string originalAmount, string curve)
         {
-            bool parseVyrobeno = int.TryParse(vyrobeno, out int numVyrobeno);
-            bool parseOriginalPocet = int.TryParse(originalPocet, out int numOriginalPocet);
+            bool parseCreated = int.TryParse(created, out int numCreated);
+            bool parseOriginalAmount = int.TryParse(originalAmount, out int numOriginalAmount);
 
 
-            if (!parseVyrobeno || !parseOriginalPocet)
+            if (!parseCreated || !parseOriginalAmount)
             {
                 return "chyba přev";
             }
 
-            if (string.IsNullOrEmpty(ohyb))
+            if (string.IsNullOrEmpty(curve))
             {
                 return "Špatně";
             }
 
-            if (numVyrobeno == 0)
+            if (numCreated == 0)
             {
                 return "Nehotovo";
             }
-            else if (numVyrobeno != numOriginalPocet || ohyb.Equals("ANO", StringComparison.OrdinalIgnoreCase))
+            else if (numCreated != numOriginalAmount || curve.Equals("ANO", StringComparison.OrdinalIgnoreCase))
             {
                 return "Rozpracováno";
             }
-            else if (numVyrobeno == numOriginalPocet && ohyb.Equals("NE", StringComparison.OrdinalIgnoreCase))
+            else if (numCreated == numOriginalAmount && curve.Equals("NE", StringComparison.OrdinalIgnoreCase))
             {
                 return "Hotovo";
             }

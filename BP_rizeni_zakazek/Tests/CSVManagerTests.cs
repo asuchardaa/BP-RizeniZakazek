@@ -28,9 +28,9 @@ namespace BP_rizeni_zakazek.Tests
         public void UspesnePridatNactenySoubor()
         {
             var testFilePath = "test.csv";
-            _csvManager.PridatNactenySoubor(testFilePath);
+            _csvManager.AddLoadedFile(testFilePath);
 
-            Assert.That(_csvManager.JeSouborJizNacten(testFilePath), Is.True);
+            Assert.That(_csvManager.isFileLoaded(testFilePath), Is.True);
         }
 
         [Test]
@@ -38,7 +38,7 @@ namespace BP_rizeni_zakazek.Tests
         {
             var testFilePath = "neexistujici.csv";
 
-            Assert.That(_csvManager.JeSouborJizNacten(testFilePath), Is.False);
+            Assert.That(_csvManager.isFileLoaded(testFilePath), Is.False);
         }
 
         // Mazu soubor hned po testovani
@@ -55,7 +55,7 @@ namespace BP_rizeni_zakazek.Tests
         public void NajitCisloObjednavkyCSV_VraciSpravneCisloObjednavky()
         {
             File.WriteAllLines(testFilePath, new[] { "Header", "Zakazka;12345;DalsiData" });
-            var vysledek = _csvManager.NajitCisloObjednavkyCSV(testFilePath);
+            var vysledek = _csvManager.FindNumberOfOrder_CSV(testFilePath);
             Assert.That(vysledek, Is.EqualTo("12345"));
         }
 
@@ -63,14 +63,14 @@ namespace BP_rizeni_zakazek.Tests
         public void NajitCisloObjednavky_NespravnyFormat_NULL()
         {
             File.WriteAllLines(testFilePath, new[] { "Header" });
-            var vysledek = _csvManager.NajitCisloObjednavkyCSV(testFilePath);
+            var vysledek = _csvManager.FindNumberOfOrder_CSV(testFilePath);
             Assert.That(vysledek, Is.Null);
         }
 
         [Test]
         public void NajitCisloObjednavky_PrazdnySoubor_NULL()
         {
-            var vysledek = _csvManager.NajitCisloObjednavkyCSV(testFilePath); // testFilePath je prázdný soubor
+            var vysledek = _csvManager.FindNumberOfOrder_CSV(testFilePath); // testFilePath je prázdný soubor
             Assert.That(vysledek, Is.Null);
         }
     }

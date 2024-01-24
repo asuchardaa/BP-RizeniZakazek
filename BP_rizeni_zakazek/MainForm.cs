@@ -1,16 +1,15 @@
-﻿using System;
-using System.Data;
-using System.Diagnostics;
-using System.Windows.Forms;
-using System.IO;
+﻿using System.Diagnostics;
 using System.Text;
 using System.Runtime.InteropServices;
 using BP_rizeni_zakazek.utils;
-using ClosedXML.Excel;
+using Newtonsoft.Json;
 
 namespace BP_rizeni_zakazek
 
 {
+    /// <summary>
+    /// Třída pro hlavní formulář s inicializací tlačítek a funkcemi
+    /// </summary>
     public partial class MainForm : Form
     {
         [DllImport("gdi32.dll", EntryPoint = "CreateRoundRectRgn")]
@@ -44,9 +43,41 @@ namespace BP_rizeni_zakazek
             dataGridViewMaster.CellContentClick +=
                 new DataGridViewCellEventHandler(dataGridViewMaster_CellContentClick);
             InitializeDataGridViewMaster();
-            //this.Load += new System.EventHandler(this.Form1_Load);
-            //settingsPanel.Visible = false;
             dataGridViewMaster.CellEndEdit += new DataGridViewCellEventHandler(detailGrid_CellEndEdit);
+
+            this.FormClosing += new FormClosingEventHandler(MainForm_FormClosing);
+            this.Load += new EventHandler(MainForm_Load);
+        }
+
+        /// <summary>
+        /// Metoda pro okamžitý save dat při zavření aplikace
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            string dataFilePath = "C:\\Users\\Adam\\Documents\\TUL\\SZZ\\BP\\data\\orders.json";
+
+            SaveDataToJson(dataFilePath);
+        }
+
+        /// <summary>
+        /// Metoda pro okamžitý load dat po startu aplikace
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            string dataFilePath = "C:\\Users\\Adam\\Documents\\TUL\\SZZ\\BP\\data\\orders.json";
+
+            if (File.Exists(dataFilePath))
+            {
+                LoadDataFromJson(dataFilePath);
+            }
+            else
+            {
+                File.Create(dataFilePath).Close();
+            }
         }
 
         /// <summary>
@@ -61,7 +92,6 @@ namespace BP_rizeni_zakazek
             OrderDoneOrNotDone.Items.Add("Hotovo");
             OrderDoneOrNotDone.Items.Add("Rozpracováno");
             OrderDoneOrNotDone.SelectedIndex = 0;
-            //LoadDataFromXlsx(ExcelFilePath);
         }
 
         /// <summary>
@@ -229,7 +259,8 @@ namespace BP_rizeni_zakazek
                 bool textMatches = masterRow.Cells["Customer"].Value.ToString().ToLower().Contains(searchText) ||
                                    masterRow.Cells["NumOfOrder"].Value.ToString().ToLower().Contains(searchText);
                 bool statusMatches = selectedStatus == "Vše" ||
-                                     masterRow.Cells["stateOfOrder"].Value.ToString().Equals(selectedStatus, StringComparison.OrdinalIgnoreCase);
+                                     masterRow.Cells["stateOfOrder"].Value.ToString().Equals(selectedStatus,
+                                         StringComparison.OrdinalIgnoreCase);
 
                 if (!textMatches && masterRow.Tag is List<string[]> detailsList)
                 {
@@ -257,7 +288,6 @@ namespace BP_rizeni_zakazek
                 DataGridViewButtonColumn expandColumn = new DataGridViewButtonColumn();
                 expandColumn.HeaderText = "";
                 expandColumn.Name = "ExpandDetails";
-                // Removed the Text property assignment
                 expandColumn.UseColumnTextForButtonValue = false;
                 expandColumn.Width = 40;
                 dataGridViewMaster.Columns.Insert(0, expandColumn);
@@ -312,17 +342,17 @@ namespace BP_rizeni_zakazek
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
                     var filePath = openFileDialog.FileName;
+                    string cisloObjednavky = _csvManager.FindNumberOfOrder_CSV(filePath);
 
                     // Kontrola duplicity
-                    if (_csvManager.JeSouborJizNacten(filePath))
+                    if (_csvManager.isFileLoaded(filePath))
                     {
                         DialogResult dialogResult = MessageBox.Show(
-                            "Tento soubor již byl nahrán. Chcete jej nahrát znovu a přepsat existující data?",
-                            "Duplicitní soubor", MessageBoxButtons.YesNo);
+                            "Tato zakázka již byla nahrán. Chcete jej nahrát znovu a přepsat existující data?",
+                            "Duplicitní zakázka", MessageBoxButtons.YesNo);
 
                         if (dialogResult == DialogResult.Yes)
                         {
-                            string cisloObjednavky = _csvManager.NajitCisloObjednavkyCSV(filePath);
                             if (cisloObjednavky != null)
                             {
                                 _dataGridViewHelper.DeleteSpecifiedRow(dataGridViewMaster, cisloObjednavky);
@@ -332,10 +362,32 @@ namespace BP_rizeni_zakazek
                         {
                             return;
                         }
+
+                        _csvManager.AddLoadedFile(filePath);
                     }
                     else
                     {
-                        _csvManager.PridatNactenySoubor(filePath);
+                        // Kontrola, zda číslo objednávky již existuje v dataGridViewMaster
+                        foreach (DataGridViewRow row in dataGridViewMaster.Rows)
+                        {
+                            if (row.Cells["NumOfOrder"].Value.ToString().Equals(cisloObjednavky))
+                            {
+                                DialogResult dialogResult = MessageBox.Show(
+                                    "Data pro toto číslo zakázky již existují. Chcete je přepsat?",
+                                    "Duplicitní zakázka", MessageBoxButtons.YesNo);
+
+                                if (dialogResult == DialogResult.Yes)
+                                {
+                                    _dataGridViewHelper.DeleteSpecifiedRow(dataGridViewMaster, cisloObjednavky);
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+                        }
+
+                        _csvManager.AddLoadedFile(filePath);
                         //nacteneSoubory.Add(filePath);
                     }
 
@@ -352,38 +404,110 @@ namespace BP_rizeni_zakazek
                             string material = fields[3].Trim();
 
                             vstupniMaterialy[cestaKSouboru] = material;
+                            rowIndex = FindOrAddMasterRow(fields);
+                            dataGridViewMaster.Rows[rowIndex].Cells["ExpandDetails"].Value = "+";
 
-                            if (!_dataGridViewHelper.RowExists(dataGridViewMaster, fields[0], fields[1], fields[8]))
-                            {
-                                rowIndex = dataGridViewMaster.Rows.Add();
-                                dataGridViewMaster.Rows[rowIndex].Cells["Customer"].Value = fields[0].Trim();
-                                dataGridViewMaster.Rows[rowIndex].Cells["NumOfOrder"].Value = fields[1].Trim();
-                                dataGridViewMaster.Rows[rowIndex].Cells["Date"].Value = fields[8].Trim();
-                                dataGridViewMaster.Rows[rowIndex].Tag = new List<string[]> { filteredFields };
-
-                                // inicializace, ale zatím nechávám skrytý
-                                CreateAndShowDetailDataGridView(rowIndex,
-                                    (List<string[]>)dataGridViewMaster.Rows[rowIndex].Tag, false);
-                            }
-                            else
-                            {
-                                rowIndex = _dataGridViewHelper.AddDetailsToExistingRow(dataGridViewMaster, fields[0],
-                                    fields[1], fields[8], filteredFields);
-                                if (rowIndex >= 0 && detailGrids.ContainsKey(rowIndex))
-                                {
-                                    var detailsList = (List<string[]>)dataGridViewMaster.Rows[rowIndex].Tag;
-                                    CreateAndShowDetailDataGridView(rowIndex, detailsList,
-                                        detailGrids[rowIndex].Visible);
-                                }
-                            }
+                            UpdateOrAddDetailGrid(rowIndex, fields, filteredFields);
                         }
                     }
 
                     _dataGridViewHelper.UpdateAllMasterGridRowStatuses(dataGridViewMaster);
-                    ExportDataToXlsx(dataGridViewMaster, detailGrids);
+                    string dataFilePath = "C:\\Users\\Adam\\Documents\\TUL\\SZZ\\BP\\data\\orders.json";
+
+                    SaveDataToJson(dataFilePath);
                 }
             }
         }
+
+        /// <summary>
+        /// Metoda pro najití nebo přidání master řádku
+        /// </summary>
+        /// <param name="fields"></param>
+        /// <returns></returns>
+        private int FindOrAddMasterRow(string[] fields)
+        {
+            string customer = fields[0].Trim();
+            string orderNumber = fields[1].Trim();
+            string date = fields[8].Trim();
+
+            for (int i = 0; i < dataGridViewMaster.Rows.Count; i++)
+            {
+                if (dataGridViewMaster.Rows[i].Cells["Customer"].Value.ToString() == customer &&
+                    dataGridViewMaster.Rows[i].Cells["NumOfOrder"].Value.ToString() == orderNumber)
+                {
+                    return i;
+                }
+            }
+
+            int rowIndex = dataGridViewMaster.Rows.Add();
+            dataGridViewMaster.Rows[rowIndex].Cells["Customer"].Value = customer;
+            dataGridViewMaster.Rows[rowIndex].Cells["NumOfOrder"].Value = orderNumber;
+            dataGridViewMaster.Rows[rowIndex].Cells["Date"].Value = date;
+            dataGridViewMaster.Rows[rowIndex].Tag = new List<string[]>();
+
+            return rowIndex;
+        }
+
+        /// <summary>
+        /// Metoda pro update nebo přidání detailGridu
+        /// </summary>
+        /// <param name="masterRowIndex"></param>
+        /// <param name="fields"></param>
+        /// <param name="filteredFields"></param>
+        private void UpdateOrAddDetailGrid(int masterRowIndex, string[] fields, string[] filteredFields)
+        {
+            List<string[]> detailsList = (List<string[]>)dataGridViewMaster.Rows[masterRowIndex].Tag;
+
+            string filePath = fields[9].Trim();
+            bool detailExists = false;
+
+            foreach (var detail in detailsList)
+            {
+                if (detail.Length > 7 && detail[7] == filePath) // cesta k souboru -> i = 7
+                {
+                    detailExists = true;
+
+                    // stejna delka
+                    int length = Math.Min(detail.Length, filteredFields.Length);
+                    for (int i = 0; i < length; i++)
+                    {
+                        detail[i] = filteredFields[i];
+                    }
+
+                    break;
+                }
+            }
+
+            if (!detailExists)
+            {
+                detailsList.Add(filteredFields);
+            }
+
+            if (!detailGrids.ContainsKey(masterRowIndex))
+            {
+                CreateAndShowDetailDataGridView(masterRowIndex, detailsList, false);
+            }
+            else
+            {
+                var detailGrid = detailGrids[masterRowIndex];
+                UpdateDetailGrid(detailGrid, detailsList);
+            }
+        }
+
+        /// <summary>
+        /// Metoda pro aktualizaci detailGridu
+        /// </summary>
+        /// <param name="detailGrid"></param>
+        /// <param name="detailsList"></param>
+        private void UpdateDetailGrid(DataGridView detailGrid, List<string[]> detailsList)
+        {
+            detailGrid.Rows.Clear();
+            foreach (var detail in detailsList)
+            {
+                detailGrid.Rows.Add(detail.Skip(2).Take(detailGrid.Columns.Count).ToArray());
+            }
+        }
+
 
         /// <summary>
         /// Metoda pro rozbalení DetailGridu
@@ -392,20 +516,21 @@ namespace BP_rizeni_zakazek
         /// <param name="e"></param>
         private void dataGridViewMaster_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            // ochrana proti kliknutí na hlavičku -> kdyžtak smazat v případě potřeby organizace
+            // ochrana proti hlavičce
             if (e.RowIndex < 0)
             {
-                return;
+                return; 
             }
 
-            if (e.RowIndex >= 0 && dataGridViewMaster.Columns[e.ColumnIndex].Name == "ExpandDetails")
+            if (dataGridViewMaster.Columns[e.ColumnIndex].Name == "ExpandDetails")
             {
                 var buttonCell = dataGridViewMaster.Rows[e.RowIndex].Cells["ExpandDetails"];
                 bool isDetailVisible = detailGrids.ContainsKey(e.RowIndex) && detailGrids[e.RowIndex].Visible;
 
                 if (isDetailVisible)
                 {
-                    DisposeDetailDataGridView(e.RowIndex);
+                    // jenom skryju detailGrid
+                    detailGrids[e.RowIndex].Visible = false;
                     buttonCell.Value = "+";
                 }
                 else
@@ -420,12 +545,10 @@ namespace BP_rizeni_zakazek
 
                 dataGridViewMaster.InvalidateRow(e.RowIndex);
             }
-
-            if (dataGridViewMaster.Columns[e.ColumnIndex].Name == "EditColumn")
+            else if (dataGridViewMaster.Columns[e.ColumnIndex].Name == "EditColumn")
             {
                 BeginEditRow(e.RowIndex);
             }
-
             else if (dataGridViewMaster.Columns[e.ColumnIndex].Name == "DeleteColumn")
             {
                 DialogResult result = MessageBox.Show("Opravdu chcete smazat tento řádek?", "Potvrzení smazání",
@@ -434,23 +557,31 @@ namespace BP_rizeni_zakazek
                 if (result == DialogResult.Yes)
                 {
                     dataGridViewMaster.Rows.RemoveAt(e.RowIndex);
+                    
+                    // odstraňuju rovnou i celej jeho příapdnej detailGrid
+                    if (detailGrids.ContainsKey(e.RowIndex))
+                    {
+                        detailGrids[e.RowIndex].Dispose();
+                        detailGrids.Remove(e.RowIndex);
+                    }
                 }
             }
         }
 
+        /// <summary>
+        /// Metoda pro začátek editace řádku
+        /// </summary>
+        /// <param name="rowIndex"></param>
         private void BeginEditRow(int rowIndex)
         {
             if (rowIndex >= 0 && rowIndex < dataGridViewMaster.Rows.Count)
             {
                 DataGridViewRow row = dataGridViewMaster.Rows[rowIndex];
 
-                // Povolit editaci pro všechny buňky v řádku
                 foreach (DataGridViewCell cell in row.Cells)
                 {
                     cell.ReadOnly = false;
                 }
-
-                // Vyberte první buňku v řádku a začněte editaci
                 dataGridViewMaster.CurrentCell = row.Cells[0];
                 dataGridViewMaster.BeginEdit(true);
             }
@@ -462,91 +593,96 @@ namespace BP_rizeni_zakazek
         /// <param name="rowIndex"></param>
         /// <param name="detailsList"></param>
         /// <param name="visible"></param>
-        private void CreateAndShowDetailDataGridView(int rowIndex, List<string[]> detailsList, bool visible)
+        private DataGridView CreateAndShowDetailDataGridView(int rowIndex, List<string[]> detailsList, bool visible)
         {
+            DataGridView detailDataGridView;
 
-            if (detailGrids.TryGetValue(rowIndex, out var existingDetailGrid))
+            if (!detailGrids.TryGetValue(rowIndex, out detailDataGridView))
             {
-                existingDetailGrid.Dispose();
-                detailGrids.Remove(rowIndex);
+                detailDataGridView = new DataGridView
+                {
+                    AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                    AllowUserToAddRows = false,
+                    ReadOnly = false,
+                    AllowUserToResizeRows = false,
+                    AllowUserToResizeColumns = false,
+                    BackgroundColor = System.Drawing.Color.FromArgb(153, 180, 209),
+                    BorderStyle = BorderStyle.None,
+                    SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+                    DefaultCellStyle = new DataGridViewCellStyle
+                    {
+                        Font = new System.Drawing.Font("Segoe UI", 9.75F),
+                        BackColor = System.Drawing.Color.AliceBlue,
+                        ForeColor = System.Drawing.Color.Black,
+
+                        // V případě potřeby organizace, Selection BC a FC odkomentovat pro zobrazení barvy výběru
+                        // SelectionBackColor = Color.AliceBlue,
+                        // SelectionForeColor = Color.Black
+                    },
+                    ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
+                    {
+                        Font = new System.Drawing.Font("Segoe UI Semibold", 10F, FontStyle.Bold),
+                        BackColor = System.Drawing.Color.CornflowerBlue,
+                        ForeColor = System.Drawing.Color.White
+                    },
+                    AlternatingRowsDefaultCellStyle = new DataGridViewCellStyle
+                    {
+                        BackColor = System.Drawing.Color.LightGray
+                    },
+                    GridColor = System.Drawing.Color.DarkGray,
+                    RowHeadersVisible = false
+                };
+
+                var deleteButtonColumn = new DataGridViewButtonColumn
+                {
+                    HeaderText = "Smazat",
+                    Name = "DeleteColumn",
+                    Text = "Smazat",
+                    UseColumnTextForButtonValue = true
+                };
+
+                detailDataGridView.RowTemplate.Height = 30;
+                detailDataGridView.ScrollBars = ScrollBars.Both;
+                detailDataGridView.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+                detailDataGridView.Tag = rowIndex;
+                detailDataGridView.CellEndEdit += new DataGridViewCellEventHandler(detailGrid_CellEndEdit);
+
+                detailDataGridView.Width = dataGridViewMaster.Width;
+
+                detailDataGridView.Columns.Add("nazev", "Název");
+                detailDataGridView.Columns.Add("material", "Materiál");
+                detailDataGridView.Columns.Add("tloustka", "Tloušťka");
+                detailDataGridView.Columns.Add("amount", "Počet");
+                detailDataGridView.Columns.Add("curve", "Ohyb");
+                detailDataGridView.Columns.Add("cestaKSouboru", "Cesta");
+                detailDataGridView.Columns.Add("created", "Vyrobeno");
+                detailDataGridView.Columns.Add("stavObjednavky", "Stav");
+
+                detailDataGridView.Columns.Add(deleteButtonColumn);
+
+                detailDataGridView.Columns["stavObjednavky"].DefaultCellStyle.BackColor = System.Drawing.Color.White;
+
+                detailDataGridView.CellFormatting +=
+                    new DataGridViewCellFormattingEventHandler(DetailDataGridView_CellFormatting);
+                detailDataGridView.Visible = visible;
+                detailDataGridView.CellClick += new DataGridViewCellEventHandler(DetailGrid_CellClick);
+
+                this.Controls.Add(detailDataGridView);
+
+                detailGrids[rowIndex] = detailDataGridView;
             }
 
-
-            var detailDataGridView = new DataGridView
-            {
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-                AllowUserToAddRows = false,
-                ReadOnly = false,
-                AllowUserToResizeRows = false,
-                AllowUserToResizeColumns = false,
-
-                //AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None,
-                BackgroundColor = System.Drawing.Color.FromArgb(153, 180, 209),
-                BorderStyle = BorderStyle.None,
-                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-                DefaultCellStyle = new DataGridViewCellStyle
-                {
-                    Font = new System.Drawing.Font("Segoe UI", 9.75F),
-                    BackColor = System.Drawing.Color.AliceBlue,
-                    ForeColor = System.Drawing.Color.Black,
-                    // V případě potřeby organizace, Selection BC a FC odkomentovat pro zobrazení barvy výběru
-                    // SelectionBackColor = Color.AliceBlue,
-                    // SelectionForeColor = Color.Black
-                },
-                ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
-                {
-                    Font = new System.Drawing.Font("Segoe UI Semibold", 10F, FontStyle.Bold),
-                    BackColor = System.Drawing.Color.CornflowerBlue,
-                    ForeColor = System.Drawing.Color.White
-                },
-                AlternatingRowsDefaultCellStyle = new DataGridViewCellStyle
-                {
-                    BackColor = System.Drawing.Color.LightGray
-                },
-                GridColor = System.Drawing.Color.DarkGray,
-                RowHeadersVisible = false
-            };
-
-            var deleteButtonColumn = new DataGridViewButtonColumn
-            {
-                HeaderText = "Smazat",
-                Name = "DeleteColumn",
-                Text = "Smazat",
-                UseColumnTextForButtonValue = true
-            };
-
-            detailDataGridView.RowTemplate.Height = 30;
-            detailDataGridView.ScrollBars = ScrollBars.Both;
-            detailDataGridView.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
-            detailDataGridView.Tag = rowIndex;
-            detailDataGridView.CellEndEdit += new DataGridViewCellEventHandler(detailGrid_CellEndEdit);
-
-            detailDataGridView.Width = dataGridViewMaster.Width;
-
-            detailDataGridView.Columns.Add("nazev", "Název");
-            detailDataGridView.Columns.Add("material", "Materiál");
-            detailDataGridView.Columns.Add("tloustka", "Tloušťka");
-            detailDataGridView.Columns.Add("pocet", "Počet");
-            detailDataGridView.Columns.Add("ohyb", "Ohyb");
-            detailDataGridView.Columns.Add("cestaKSouboru", "Cesta");
-            detailDataGridView.Columns.Add("vyrobeno", "Vyrobeno");
-            detailDataGridView.Columns.Add("stavObjednavky", "Stav");
-
-            detailDataGridView.Columns.Add(deleteButtonColumn);
-
-            detailDataGridView.Columns["stavObjednavky"].DefaultCellStyle.BackColor = System.Drawing.Color.White;
-
-            detailDataGridView.CellFormatting +=
-                new DataGridViewCellFormattingEventHandler(DetailDataGridView_CellFormatting);
-            detailDataGridView.Visible = visible;
-            detailDataGridView.CellClick += new DataGridViewCellEventHandler(DetailGrid_CellClick);
-
-
-            detailGrids[rowIndex] = detailDataGridView;
+            detailDataGridView.Rows.Clear();
 
             foreach (var detail in detailsList)
             {
-                //detailDataGridView.Rows.Add(detail.Skip(2).Take(detailDataGridView.Columns.Count).ToArray());
+                Debug.WriteLine($"Detail: {String.Join(", ", detail)}");
+
+                if (detail.Length < 8)
+                {
+                    Debug.WriteLine("Chyba: Pole detail nemá dostatečný počet prvků.");
+                    continue;
+                }
 
                 int detailIndex =
                     detailDataGridView.Rows.Add(detail.Skip(2).Take(detailDataGridView.Columns.Count).ToArray());
@@ -567,15 +703,28 @@ namespace BP_rizeni_zakazek
             detailDataGridView.Location = new Point(dataGridViewMaster.Location.X, currentY);
             detailGrids[rowIndex] = detailDataGridView;
             this.Controls.Add(detailDataGridView);
+            detailDataGridView.Visible = visible;
+
             detailDataGridView.BringToFront();
 
             if (visible)
             {
                 dataGridViewMaster.Rows[rowIndex].Cells["ExpandDetails"].Value = "-";
             }
+            else
+            {
+                dataGridViewMaster.Rows[rowIndex].Cells["ExpandDetails"].Value = "+";
+            }
+            //SaveDataToJson("C:\\Users\\Adam\\Documents\\TUL\\SZZ\\BP\\data\\orders.json");
+
+            return detailDataGridView;
         }
 
-        // Metoda pro zpracování kliknutí na tlačítko v detailGrid
+        /// <summary>
+        /// Metoda pro smazání řádku v detailGridu
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void DetailGrid_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             var grid = sender as DataGridView;
@@ -587,7 +736,8 @@ namespace BP_rizeni_zakazek
             if (e.ColumnIndex == grid.Columns["DeleteColumn"].Index)
             {
                 var nazevPoložky = grid.Rows[e.RowIndex].Cells["nazev"].Value?.ToString() ?? "neznámá položka";
-                var result = MessageBox.Show($"Opravdu chcete smazat položku '{nazevPoložky}'?", "Potvrzení smazání", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                var result = MessageBox.Show($"Opravdu chcete smazat položku '{nazevPoložky}'?", "Potvrzení smazání",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
 
                 if (result == DialogResult.Yes)
                 {
@@ -598,27 +748,11 @@ namespace BP_rizeni_zakazek
                         detailsList.RemoveAt(e.RowIndex);
                         grid.Rows.RemoveAt(e.RowIndex);
 
-                        var celkovýStav = UrčitStavZakázky(detailsList);
+                        var celkovýStav = DetermineOrderStatus(detailsList);
                         masterRow.Cells["stateOfOrder"].Value = celkovýStav;
-                        AktualizovatBarvuStavuZakázky(masterRow, celkovýStav);
+                        UpdateColorStatusOrders(masterRow, celkovýStav);
                     }
                 }
-            }
-        }
-
-        /// <summary>
-        /// Metoda pro zrušení DetailGridu
-        /// </summary>
-        /// <param name="masterRowIndex"></param>
-        private void DisposeDetailDataGridView(int masterRowIndex)
-        {
-            if (detailGrids.TryGetValue(masterRowIndex, out var detailPanel))
-            {
-                Controls.Remove(detailPanel);
-                detailPanel.Dispose();
-                detailGrids.Remove(masterRowIndex);
-
-                dataGridViewMaster.Rows[masterRowIndex].Cells["ExpandDetails"].Value = "+";
             }
         }
 
@@ -671,7 +805,6 @@ namespace BP_rizeni_zakazek
                                         detail[9] = novyStavObjednavky;
 
 
-
                                         UpdateDetailGridRow(masterRow.Index, detail);
                                     }
                                 }
@@ -690,9 +823,10 @@ namespace BP_rizeni_zakazek
                             }
                         }
                     }
-
                     _dataGridViewHelper.UpdateAllMasterGridRowStatuses(dataGridViewMaster);
-                    ExportDataToXlsx(dataGridViewMaster, detailGrids);
+
+                    //string dataFilePath = "C:\\Users\\Adam\\Documents\\TUL\\SZZ\\BP\\data\\orders.json";
+                    //SaveDataToJson(dataFilePath);
                 }
             }
         }
@@ -710,22 +844,29 @@ namespace BP_rizeni_zakazek
 
                 foreach (DataGridViewRow row in detailGrid.Rows)
                 {
-                    //if (row.IsNewRow) continue;
-                    string status = row.Cells["stavObjednavky"].Value?.ToString();
-
                     if (row.Cells["cestaKSouboru"].Value?.ToString().Trim() == cestaKSouboru)
                     {
-                        row.Cells["vyrobeno"].Value = detail[8];
+                        row.Cells["created"].Value = detail[8];
                         row.Cells["stavObjednavky"].Value = detail[9];
 
-                        // Po aktualizaci jednoho řádku se nemusí pokračovat v iteraci, pokud je 'cestaKSouboru' unikátní pro každý řádek.
-                        // break;
+                        // Aktualizace detailList v masterRow
+                        var detailsList = dataGridViewMaster.Rows[masterRowIndex].Tag as List<string[]>;
+                        var existingDetail = detailsList.FirstOrDefault(d => d[7].Trim() == cestaKSouboru);
+                        if (existingDetail != null)
+                        {
+                            existingDetail[8] = detail[8];
+                            existingDetail[9] = detail[9];
+                        }
+
+                        break;
                     }
                 }
 
                 detailGrid.Refresh();
+                SaveDataToJson("C:\\Users\\Adam\\Documents\\TUL\\SZZ\\BP\\data\\orders.json");
             }
         }
+
 
         /// <summary>
         /// Metoda pro zbarvení buňky dle stavu položky v zakázce
@@ -749,7 +890,7 @@ namespace BP_rizeni_zakazek
                     vystupniMaterialy.TryGetValue(cestaKSouboru, out string vystupniMaterial) &&
                     vstupniMaterial != vystupniMaterial)
                 {
-                    e.CellStyle.BackColor = System.Drawing.Color.DeepPink; // Změna barvy na červenou
+                    e.CellStyle.BackColor = System.Drawing.Color.DeepPink;
                 }
             }
 
@@ -761,133 +902,11 @@ namespace BP_rizeni_zakazek
             }
         }
 
-        private const string ExcelFilePath = @"C:\Users\Adam\Documents\TUL\SZZ\BP\data\orders.xlsx";
-
-
-        public void ExportDataToXlsx(DataGridView masterGrid, Dictionary<int, DataGridView> detailGrids)
-        {
-            Debug.WriteLine("Začínám export do Excelu.");
-
-            using (var workbook = new XLWorkbook())
-            {
-                for (int i = 0; i < masterGrid.Rows.Count; i++)
-                {
-                    var masterRow = masterGrid.Rows[i];
-                    if (!masterRow.IsNewRow)
-                    {
-                        var orderNumber = masterRow.Cells["NumOfOrder"].Value.ToString();
-                        Debug.WriteLine($"Vytvářím list pro objednávku číslo: {orderNumber}");
-
-                        var worksheet = workbook.Worksheets.Add("Order_" + orderNumber);
-
-                        // Přidání hlaviček a dat masterGrid do prvního řádku
-                        for (int colIndex = 0; colIndex < masterGrid.Columns.Count; colIndex++)
-                        {
-                            worksheet.Cell(1, colIndex + 1).Value = masterGrid.Columns[colIndex].HeaderText; // Hlavička
-                            worksheet.Cell(2, colIndex + 1).Value =
-                                masterRow.Cells[colIndex].Value?.ToString() ?? ""; // Data
-                        }
-
-                        if (detailGrids.ContainsKey(i))
-                        {
-                            var detailGrid = detailGrids[i];
-                            Debug.WriteLine(
-                                $"DetailGrid pro objednávku číslo: {orderNumber} má {detailGrid.Rows.Count} řádků.");
-                            ExportGridToWorksheet(detailGrid, worksheet,
-                                startRow: 3); // Přidání detailGrid od třetího řádku
-                        }
-                        else
-                        {
-                            Debug.WriteLine($"DetailGrid pro objednávku číslo: {orderNumber} nebyl nalezen.");
-                        }
-                    }
-                }
-
-                // Uložení do souboru
-                var fileInfo = new FileInfo(ExcelFilePath);
-                fileInfo.Directory.Create();
-                workbook.SaveAs(ExcelFilePath);
-                Debug.WriteLine($"Data byla uložena do souboru: {ExcelFilePath}");
-            }
-        }
-
-        private void ExportGridToWorksheet(DataGridView grid, IXLWorksheet worksheet, int startRow = 1)
-        {
-            // Přidání hlaviček
-            for (int colIndex = 0; colIndex < grid.Columns.Count; colIndex++)
-            {
-                worksheet.Cell(startRow, colIndex + 1).Value = grid.Columns[colIndex].HeaderText;
-            }
-
-            // Přidání dat
-            for (int rowIndex = 0; rowIndex < grid.Rows.Count; rowIndex++)
-            {
-                var row = grid.Rows[rowIndex];
-                if (!row.IsNewRow)
-                {
-                    for (int colIndex = 0; colIndex < grid.Columns.Count; colIndex++)
-                    {
-                        worksheet.Cell(rowIndex + startRow + 1, colIndex + 1).Value =
-                            row.Cells[colIndex].Value?.ToString() ?? "";
-                    }
-                }
-            }
-        }
-
-
-        /*private void LoadDataFromXlsx(string filePath)
-        {
-            using (var workbook = new XLWorkbook(filePath))
-            {
-                foreach (var worksheet in workbook.Worksheets)
-                {
-                    if (int.TryParse(worksheet.Name.Replace("Order_", ""), out int orderNumber))
-                    {
-                        DataGridView detailGrid;
-
-                        // Kontrola, jestli už detailGrid existuje v slovníku
-                        if (detailGrids.ContainsKey(orderNumber))
-                        {
-                            detailGrid = detailGrids[orderNumber];
-                        }
-                        else
-                        {
-                            detailGrid = new DataGridView();
-                            detailGrids[orderNumber] = detailGrid;
-                        }
-
-                        var rows = worksheet.RowsUsed().ToList();
-                        if (rows.Count < 3) continue; // Pokud nejsou dostatečná data, pokračujeme dalším listem.
-
-                        // Vytvoření sloupců pro masterGrid podle druhého řádku v Excelu (hlavička detailGrid)
-                        CreateColumnsForDataGridView(dataGridViewMaster, rows[2]);
-
-                        // Vytvoření sloupců pro detailGrid podle třetího řádku v Excelu (hlavička detailGrid)
-                        CreateColumnsForDataGridView(detailGrid, rows[2]);
-
-                        // Přidání dat do masterGrid
-                        int masterRowIndex = dataGridViewMaster.Rows.Add();
-                        for (int i = 0; i < dataGridViewMaster.Columns.Count; i++)
-                        {
-                            dataGridViewMaster.Rows[masterRowIndex].Cells[i].Value = rows[1].Cell(i + 1).Value;
-                        }
-
-                        // Přidání dat do detailGrid
-                        for (int rowIndex = 3; rowIndex < rows.Count; rowIndex++) // Začneme na čtvrtém řádku
-                        {
-                            int detailIndex = detailGrid.Rows.Add();
-                            for (int colIndex = 0; colIndex < detailGrid.Columns.Count; colIndex++)
-                            {
-                                detailGrid.Rows[detailIndex].Cells[colIndex].Value =
-                                    rows[rowIndex].Cell(colIndex + 1).Value;
-                            }
-                        }
-                    }
-                }
-            }
-        }*/
-
-
+        /// <summary>
+        /// Metoda pro uložení upravení a uložení dat v detailGridu
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void detailGrid_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
             var detailGrid = sender as DataGridView;
@@ -911,70 +930,71 @@ namespace BP_rizeni_zakazek
                 Debug.WriteLine($"Aktuální data: Vyrobeno = {vyrobeno}, Počet = {pocet}, Ohyb = {ohyb}");
 
 
-                string novyStav = UrčitNovýStav(vyrobeno, pocet, ohyb);
-                Debug.WriteLine($"Nový stav objednávky: {novyStav}");
+                string novyStav = DetermineTheNewStatus(vyrobeno, pocet, ohyb);
+                Debug.WriteLine($"Nový status objednávky: {novyStav}");
 
-
-                // Aktualizujte rowData
                 var rowData = detailsList[e.RowIndex];
-                rowData[8] = vyrobeno; // Index pro 'vyrobeno'
-                rowData[5] = pocet; // Index pro 'pocet'
-                rowData[6] = ohyb; // Index pro 'ohyb'
-                rowData[9] = novyStav; // Index pro 'stavObjednavky', předpokládá se, že je na indexu 7
+                rowData[8] = vyrobeno; 
+                rowData[5] = pocet;
+                rowData[6] = ohyb; 
+                rowData[9] = novyStav; 
 
-                // Aktualizace stavu v detailGridu
                 detailRow.Cells["stavObjednavky"].Value = novyStav;
 
-                var celkovýStav = UrčitStavZakázky(detailsList);
+                var celkovýStav = DetermineOrderStatus(detailsList);
                 dataGridViewMaster.Rows[masterRowIndex].Cells["stateOfOrder"].Value = celkovýStav;
-                Debug.WriteLine($"Celkový stav zakázky: {celkovýStav}");
+                Debug.WriteLine($"Celkový status zakázky: {celkovýStav}");
 
-                // Aktualizujte barvu na základě celkového stavu
-                AktualizovatBarvuStavuZakázky(dataGridViewMaster.Rows[masterRowIndex], celkovýStav);
+                UpdateColorStatusOrders(dataGridViewMaster.Rows[masterRowIndex], celkovýStav);
+                SaveDataToJson("C:\\Users\\Adam\\Documents\\TUL\\SZZ\\BP\\data\\orders.json");
             }
             else
             {
                 Debug.WriteLine("Chyba: Řádek detailGrid nebyl nalezen v seznamu detailů.");
-
             }
         }
 
 
-        private void AktualizovatBarvuStavuZakázky(DataGridViewRow masterRow, string stav)
+        private void UpdateColorStatusOrders(DataGridViewRow masterRow, string status)
         {
-            if (stav == "Hotovo")
+            if (status == "Hotovo")
             {
-                masterRow.Cells[5].Style.BackColor = System.Drawing.Color.Green; // nebo jiná barva pro Hotovo
+                masterRow.Cells[5].Style.BackColor = System.Drawing.Color.Green;
             }
-            else if (stav == "Rozpracováno")
+            else if (status == "Rozpracováno")
             {
-                masterRow.Cells[5].Style.BackColor = System.Drawing.Color.Yellow; // nebo jiná barva pro Rozpracováno
+                masterRow.Cells[5].Style.BackColor = System.Drawing.Color.Yellow;
             }
             else
             {
-                masterRow.Cells[5].Style.BackColor = System.Drawing.Color.LightGray; // nebo jiná barva pro Neznámý stav
+                masterRow.Cells[5].Style.BackColor = System.Drawing.Color.LightGray;
             }
         }
 
 
-        private string UrčitStavZakázky(List<string[]> detailData)
+        /// <summary>
+        /// Metoda pro určení stavu zakázky po opětovnéím nahrání json souboru nebo editaci
+        /// </summary>
+        /// <param name="detailData"></param>
+        /// <returns></returns>
+        private string DetermineOrderStatus(List<string[]> detailData)
         {
             bool anyInProgressOrComplete = false;
             bool allDone = true;
 
-            foreach (var řádek in detailData)
+            foreach (var row in detailData)
             {
-                string stav = řádek[9]; // Předpokládá se, že index 7 obsahuje stav
+                string status = row[9];
 
-                if (stav.Equals("Hotovo", StringComparison.OrdinalIgnoreCase))
+                if (status.Equals("Hotovo", StringComparison.OrdinalIgnoreCase))
                 {
-                    anyInProgressOrComplete = true; // alespoň jeden stav "Hotovo"
+                    anyInProgressOrComplete = true; // alespoň jeden status "Hotovo"
                 }
                 else
                 {
                     allDone = false;
-                    if (stav.Equals("Rozpracováno", StringComparison.OrdinalIgnoreCase) ||
-                        stav.Equals("Hotovo", StringComparison.OrdinalIgnoreCase))
+                    if (status.Equals("Rozpracováno", StringComparison.OrdinalIgnoreCase) ||
+                        status.Equals("Hotovo", StringComparison.OrdinalIgnoreCase))
                     {
                         anyInProgressOrComplete = true; // alespoň jeden "Rozpracovano" nebo "Hotovo"
                     }
@@ -997,71 +1017,173 @@ namespace BP_rizeni_zakazek
             return "Nezadáno";
         }
 
-
-        private string UrčitNovýStav(string vyrobeno, string pocet, string ohyb)
+        /// <summary>
+        /// Metoda pro určení nového stavu objednávky po editu
+        /// </summary>
+        /// <param name="created"></param>
+        /// <param name="amount"></param>
+        /// <param name="curve"></param>
+        /// <returns></returns>
+        private string DetermineTheNewStatus(string created, string amount, string curve)
         {
-            if (string.IsNullOrEmpty(vyrobeno))
+            if (string.IsNullOrEmpty(created))
             {
                 return "Neznámý";
             }
 
-            if (int.TryParse(vyrobeno, out int vyrobenoInt) && int.TryParse(pocet, out int pocetInt))
+            if (int.TryParse(created, out int createdInt) && int.TryParse(amount, out int amountInt))
             {
-                if (vyrobenoInt == pocetInt)
+                if (createdInt == amountInt)
                 {
-                    if (ohyb.Equals("NE", StringComparison.OrdinalIgnoreCase))
+                    if (curve.Equals("NE", StringComparison.OrdinalIgnoreCase))
                     {
                         return "Hotovo";
                     }
-                    else if (ohyb.Equals("ANO", StringComparison.OrdinalIgnoreCase))
+                    else if (curve.Equals("ANO", StringComparison.OrdinalIgnoreCase))
                     {
                         return "Rozpracováno";
                     }
                 }
-                else if (vyrobenoInt < pocetInt)
+                else if (createdInt < amountInt)
                 {
                     return "Rozpracováno";
                 }
-                else if (vyrobenoInt > pocetInt)
+                else if (createdInt > amountInt)
                 {
                     return "Více kusů";
                 }
             }
 
-            return "Neplatný stav";
+            return "Neplatný status";
+        }
+
+        /// <summary>
+        /// Metoda pro uložení dat do JSON souboru
+        /// </summary>
+        /// <param name="filePath"></param>
+        private void SaveDataToJson(string filePath)
+        {
+            var masterGridData = dataGridViewMaster.Rows
+                .Cast<DataGridViewRow>()
+                .Where(r => !r.IsNewRow)
+                .Select(r => r.Cells.Cast<DataGridViewCell>().Select(c => c.Value?.ToString() ?? "").ToArray())
+                .ToList();
+
+            Debug.WriteLine("Získána data z hlavního DataGridView");
+
+
+            var detailGridsData = new Dictionary<int, List<string[]>>();
+
+            foreach (var kvp in detailGrids)
+            {
+                var rowIndex = kvp.Key;
+                var detailGrid = kvp.Value;
+
+                var masterRowData = dataGridViewMaster.Rows[rowIndex].Cells.Cast<DataGridViewCell>()
+                    .Select(c => c.Value?.ToString() ?? "").ToArray();
+                var customer = masterRowData[1]; // Zákazník
+                var orderNumber = masterRowData[2]; // Číslo objednávky
+
+                Debug.WriteLine($"Získána data pro detailní DataGridView na řádku {rowIndex}");
+
+
+                var detailRows = detailGrid.Rows
+                    .Cast<DataGridViewRow>()
+                    .Where(r => !r.IsNewRow)
+                    .Select(r =>
+                        new[] { customer, orderNumber }
+                            .Concat(r.Cells.Cast<DataGridViewCell>().Select(c => c.Value?.ToString() ?? "")).ToArray())
+                    .ToList();
+
+                Debug.WriteLine($"Získána data pro detailní DataGridView na řádku {rowIndex}");
+
+
+                detailGridsData.Add(rowIndex, detailRows);
+            }
+
+            var data = new
+            {
+                MasterGridData = masterGridData,
+                DetailGridsData = detailGridsData
+            };
+
+            string json = JsonConvert.SerializeObject(data, Formatting.Indented);
+            File.WriteAllText(filePath, json);
+
+            Debug.WriteLine("Data byla úspěšně uložena do JSON souboru");
+
+            Debug.WriteLine("Zapsaná data:");
+            Debug.WriteLine(json);
         }
 
 
-        private void UpdateXlsxFileWithNewData(string orderNumber, DataGridViewRow updatedMasterRow,
-            DataGridView detailGrid)
+        /// <summary>
+        /// Metoda pro načtení dat z JSON souboru
+        /// </summary>
+        /// <param name="filePath"></param>
+        private void LoadDataFromJson(string filePath)
         {
-            using (var workbook = new XLWorkbook(ExcelFilePath))
+            if (!File.Exists(filePath))
             {
-                var worksheet = workbook.Worksheets.FirstOrDefault(ws => ws.Name == "Order_" + orderNumber);
-                if (worksheet != null)
-                {
-                    // Aktualizace masterGrid row
-                    for (int i = 0; i < updatedMasterRow.Cells.Count; i++)
-                    {
-                        worksheet.Cell(2, i + 1).Value = updatedMasterRow.Cells[i].Value?.ToString() ?? "";
-                    }
+                MessageBox.Show("Soubor s daty neexistuje. Bude vytvořen nový soubor při ukončení aplikace.",
+                    "Informace", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
 
-                    // Aktualizace detailGrid rows
-                    if (detailGrid != null)
+            string json = File.ReadAllText(filePath);
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                MessageBox.Show("Soubor s daty je prázdný. Žádná data nebudou načtena.", "Informace",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            try
+            {
+                var jsonData = JsonConvert.DeserializeObject<dynamic>(json);
+                var masterGridData = jsonData.MasterGridData.ToObject<List<string[]>>();
+                var detailGridsData = jsonData.DetailGridsData.ToObject<Dictionary<int, List<string[]>>>();
+
+                // Načtení dat do dataGridViewMaster
+                dataGridViewMaster.Rows.Clear();
+                foreach (var rowArray in masterGridData)
+                {
+                    int rowIndex = dataGridViewMaster.Rows.Add(rowArray);
+                    var masterRow = dataGridViewMaster.Rows[rowIndex];
+                    masterRow.Tag = new List<string[]>();
+                    dataGridViewMaster.Rows[rowIndex].Tag = new List<string[]>();
+                    string orderStatus = rowArray[5];
+                    _orderManager.SetOrderCellColor(dataGridViewMaster.Rows[rowIndex].Cells[5], orderStatus);
+                    int dateColumnIndex = 3; 
+                    _orderManager.HighlightOverdueDates(masterRow, dateColumnIndex);
+                }
+
+                foreach (var kvp in detailGridsData)
+                {
+                    int masterRowIndex = kvp.Key;
+                    var detailsList = kvp.Value;
+
+                    if (masterRowIndex < dataGridViewMaster.Rows.Count)
                     {
-                        for (int rowIndex = 0; rowIndex < detailGrid.Rows.Count; rowIndex++)
+                        dataGridViewMaster.Rows[masterRowIndex].Tag = detailsList;
+                        CreateAndShowDetailDataGridView(masterRowIndex, detailsList, false);
+
+                        if (detailGrids.TryGetValue(masterRowIndex, out var existingDetailGrid))
                         {
-                            var row = detailGrid.Rows[rowIndex];
-                            for (int colIndex = 0; colIndex < row.Cells.Count; colIndex++)
-                            {
-                                worksheet.Cell(rowIndex + 3, colIndex + 1).Value =
-                                    row.Cells[colIndex].Value?.ToString() ?? "";
-                            }
+                            UpdateDetailGrid(existingDetailGrid, detailsList);
+                        }
+                        else
+                        {
+                            var newDetailGrid = CreateAndShowDetailDataGridView(masterRowIndex, detailsList, false);
+                            detailGrids[masterRowIndex] = newDetailGrid;
                         }
                     }
-
-                    workbook.Save();
                 }
+            }
+            catch (JsonException ex)
+            {
+                MessageBox.Show($"Chyba při načítání dat: {ex.Message}", "Chyba", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
         }
     }
