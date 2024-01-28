@@ -265,8 +265,6 @@ namespace BP_rizeni_zakazek.utils
             {
                 return "Nezadáno";
             }
-
-            return "Nezadáno";
         }
 
         /// <summary>

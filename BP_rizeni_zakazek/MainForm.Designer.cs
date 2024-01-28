@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             panel1 = new Panel();
             label1 = new Label();
             OrderDoneOrNotDone = new ComboBox();
@@ -45,7 +45,7 @@
             panel2 = new Panel();
             PnlNav = new Panel();
             OrganizationName = new Label();
-            userName = new Label();
+            appName = new Label();
             pictureBox1 = new PictureBox();
             dataGridViewMaster = new DataGridView();
             Customer = new DataGridViewTextBoxColumn();
@@ -53,6 +53,7 @@
             Date = new DataGridViewTextBoxColumn();
             dateOfFinish = new DataGridViewTextBoxColumn();
             stateOfOrder = new DataGridViewTextBoxColumn();
+            mainPanel = new Panel();
             panel1.SuspendLayout();
             panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
@@ -84,18 +85,24 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Font = new Font("Microsoft Sans Serif", 9.75F, FontStyle.Bold, GraphicsUnit.Point);
+            label1.Font = new Font("Microsoft Sans Serif", 12F, FontStyle.Bold, GraphicsUnit.Point);
             label1.ForeColor = Color.FromArgb(0, 126, 249);
-            label1.Location = new Point(60, 351);
+            label1.Location = new Point(60, 361);
             label1.Name = "label1";
-            label1.Size = new Size(41, 16);
+            label1.Size = new Size(48, 20);
             label1.TabIndex = 10;
             label1.Text = "Filtry";
             // 
             // OrderDoneOrNotDone
             // 
+            OrderDoneOrNotDone.BackColor = SystemColors.Window;
+            OrderDoneOrNotDone.DrawMode = DrawMode.OwnerDrawFixed;
+            OrderDoneOrNotDone.DropDownStyle = ComboBoxStyle.DropDownList;
+            OrderDoneOrNotDone.FlatStyle = FlatStyle.Flat;
+            OrderDoneOrNotDone.Font = new Font("Microsoft Sans Serif", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
+            OrderDoneOrNotDone.ForeColor = Color.Black;
             OrderDoneOrNotDone.FormattingEnabled = true;
-            OrderDoneOrNotDone.Location = new Point(25, 380);
+            OrderDoneOrNotDone.Location = new Point(25, 399);
             OrderDoneOrNotDone.Name = "OrderDoneOrNotDone";
             OrderDoneOrNotDone.Size = new Size(121, 23);
             OrderDoneOrNotDone.TabIndex = 9;
@@ -103,7 +110,7 @@
             // 
             // FilterTextBox
             // 
-            FilterTextBox.Location = new Point(25, 418);
+            FilterTextBox.Location = new Point(25, 442);
             FilterTextBox.Name = "FilterTextBox";
             FilterTextBox.Size = new Size(121, 23);
             FilterTextBox.TabIndex = 8;
@@ -111,21 +118,31 @@
             // 
             // BtnUploadHot
             // 
-            BtnUploadHot.Location = new Point(93, 939);
+            BtnUploadHot.Cursor = Cursors.Hand;
+            BtnUploadHot.FlatAppearance.BorderSize = 0;
+            BtnUploadHot.FlatStyle = FlatStyle.Flat;
+            BtnUploadHot.Font = new Font("Microsoft Sans Serif", 12F, FontStyle.Bold, GraphicsUnit.Point);
+            BtnUploadHot.ForeColor = SystemColors.Control;
+            BtnUploadHot.Location = new Point(0, 784);
             BtnUploadHot.Name = "BtnUploadHot";
-            BtnUploadHot.Size = new Size(75, 23);
+            BtnUploadHot.Size = new Size(186, 62);
             BtnUploadHot.TabIndex = 7;
-            BtnUploadHot.Text = "UploadHot";
+            BtnUploadHot.Text = "Nahrát výstup";
             BtnUploadHot.UseVisualStyleBackColor = true;
             BtnUploadHot.Click += BtnUploadHot_Click;
             // 
             // BtnUpload
             // 
-            BtnUpload.Location = new Point(12, 939);
+            BtnUpload.Cursor = Cursors.Hand;
+            BtnUpload.FlatAppearance.BorderSize = 0;
+            BtnUpload.FlatStyle = FlatStyle.Flat;
+            BtnUpload.Font = new Font("Microsoft Sans Serif", 12F, FontStyle.Bold, GraphicsUnit.Point);
+            BtnUpload.ForeColor = SystemColors.Control;
+            BtnUpload.Location = new Point(0, 716);
             BtnUpload.Name = "BtnUpload";
-            BtnUpload.Size = new Size(75, 23);
+            BtnUpload.Size = new Size(186, 62);
             BtnUpload.TabIndex = 6;
-            BtnUpload.Text = "UploadZak";
+            BtnUpload.Text = "Nahrát vstup";
             BtnUpload.UseVisualStyleBackColor = true;
             BtnUpload.Click += BtnUpload_Click;
             // 
@@ -145,11 +162,14 @@
             BtnSettings.Font = new Font("Nirmala UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point);
             BtnSettings.ForeColor = Color.FromArgb(0, 126, 249);
             BtnSettings.Image = (Image)resources.GetObject("BtnSettings.Image");
+            BtnSettings.ImageAlign = ContentAlignment.MiddleRight;
             BtnSettings.Location = new Point(0, 999);
             BtnSettings.Name = "BtnSettings";
+            BtnSettings.Padding = new Padding(10, 0, 0, 0);
             BtnSettings.Size = new Size(186, 42);
             BtnSettings.TabIndex = 5;
             BtnSettings.Text = "Nastavení";
+            BtnSettings.TextAlign = ContentAlignment.MiddleLeft;
             BtnSettings.TextImageRelation = TextImageRelation.TextBeforeImage;
             BtnSettings.UseVisualStyleBackColor = true;
             BtnSettings.Click += BtnSettings_Click;
@@ -163,11 +183,14 @@
             BtnArchive.Font = new Font("Nirmala UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point);
             BtnArchive.ForeColor = Color.FromArgb(0, 126, 249);
             BtnArchive.Image = (Image)resources.GetObject("BtnArchive.Image");
+            BtnArchive.ImageAlign = ContentAlignment.MiddleRight;
             BtnArchive.Location = new Point(0, 285);
             BtnArchive.Name = "BtnArchive";
+            BtnArchive.Padding = new Padding(10, 0, 0, 0);
             BtnArchive.Size = new Size(186, 42);
             BtnArchive.TabIndex = 4;
             BtnArchive.Text = "Archiv";
+            BtnArchive.TextAlign = ContentAlignment.MiddleLeft;
             BtnArchive.TextImageRelation = TextImageRelation.TextBeforeImage;
             BtnArchive.UseVisualStyleBackColor = true;
             BtnArchive.Click += BtnArchive_Click;
@@ -181,11 +204,14 @@
             BtnCalender.Font = new Font("Nirmala UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point);
             BtnCalender.ForeColor = Color.FromArgb(0, 126, 249);
             BtnCalender.Image = (Image)resources.GetObject("BtnCalender.Image");
+            BtnCalender.ImageAlign = ContentAlignment.MiddleRight;
             BtnCalender.Location = new Point(0, 243);
             BtnCalender.Name = "BtnCalender";
+            BtnCalender.Padding = new Padding(10, 0, 0, 0);
             BtnCalender.Size = new Size(186, 42);
             BtnCalender.TabIndex = 3;
             BtnCalender.Text = "Kalendář";
+            BtnCalender.TextAlign = ContentAlignment.MiddleLeft;
             BtnCalender.TextImageRelation = TextImageRelation.TextBeforeImage;
             BtnCalender.UseVisualStyleBackColor = true;
             BtnCalender.Click += BtnCalender_Click;
@@ -199,11 +225,14 @@
             BtnStatistics.Font = new Font("Nirmala UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point);
             BtnStatistics.ForeColor = Color.FromArgb(0, 126, 249);
             BtnStatistics.Image = (Image)resources.GetObject("BtnStatistics.Image");
+            BtnStatistics.ImageAlign = ContentAlignment.MiddleRight;
             BtnStatistics.Location = new Point(0, 201);
             BtnStatistics.Name = "BtnStatistics";
+            BtnStatistics.Padding = new Padding(10, 0, 0, 0);
             BtnStatistics.Size = new Size(186, 42);
             BtnStatistics.TabIndex = 2;
             BtnStatistics.Text = "Statistiky";
+            BtnStatistics.TextAlign = ContentAlignment.MiddleLeft;
             BtnStatistics.TextImageRelation = TextImageRelation.TextBeforeImage;
             BtnStatistics.UseVisualStyleBackColor = true;
             BtnStatistics.Click += BtnStatistics_Click;
@@ -212,16 +241,18 @@
             // BtnDashboard
             // 
             BtnDashboard.Dock = DockStyle.Top;
-            BtnDashboard.FlatAppearance.BorderSize = 0;
             BtnDashboard.FlatStyle = FlatStyle.Flat;
             BtnDashboard.Font = new Font("Nirmala UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point);
             BtnDashboard.ForeColor = Color.FromArgb(0, 126, 249);
             BtnDashboard.Image = (Image)resources.GetObject("BtnDashboard.Image");
+            BtnDashboard.ImageAlign = ContentAlignment.MiddleRight;
             BtnDashboard.Location = new Point(0, 159);
             BtnDashboard.Name = "BtnDashboard";
+            BtnDashboard.Padding = new Padding(10, 0, 0, 0);
             BtnDashboard.Size = new Size(186, 42);
             BtnDashboard.TabIndex = 1;
             BtnDashboard.Text = "Hlavní stránka";
+            BtnDashboard.TextAlign = ContentAlignment.MiddleLeft;
             BtnDashboard.TextImageRelation = TextImageRelation.TextBeforeImage;
             BtnDashboard.UseVisualStyleBackColor = true;
             BtnDashboard.Click += BtnDashboard_Click;
@@ -231,7 +262,7 @@
             // 
             panel2.Controls.Add(PnlNav);
             panel2.Controls.Add(OrganizationName);
-            panel2.Controls.Add(userName);
+            panel2.Controls.Add(appName);
             panel2.Controls.Add(pictureBox1);
             panel2.Dock = DockStyle.Top;
             panel2.Location = new Point(0, 0);
@@ -258,16 +289,16 @@
             OrganizationName.TabIndex = 2;
             OrganizationName.Text = "Jméno organizace";
             // 
-            // userName
+            // appName
             // 
-            userName.AutoSize = true;
-            userName.Font = new Font("Microsoft Sans Serif", 9.75F, FontStyle.Bold, GraphicsUnit.Point);
-            userName.ForeColor = Color.FromArgb(0, 126, 249);
-            userName.Location = new Point(45, 98);
-            userName.Name = "userName";
-            userName.Size = new Size(88, 16);
-            userName.TabIndex = 1;
-            userName.Text = "User/Admin";
+            appName.AutoSize = true;
+            appName.Font = new Font("Microsoft Sans Serif", 9.75F, FontStyle.Bold, GraphicsUnit.Point);
+            appName.ForeColor = Color.FromArgb(0, 126, 249);
+            appName.Location = new Point(35, 97);
+            appName.Name = "appName";
+            appName.Size = new Size(111, 16);
+            appName.TabIndex = 1;
+            appName.Text = "Řízení zakázek";
             // 
             // pictureBox1
             // 
@@ -285,14 +316,14 @@
             dataGridViewMaster.BackgroundColor = SystemColors.ActiveCaption;
             dataGridViewMaster.BorderStyle = BorderStyle.None;
             dataGridViewMaster.CellBorderStyle = DataGridViewCellBorderStyle.None;
-            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = SystemColors.ButtonShadow;
-            dataGridViewCellStyle1.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
-            dataGridViewCellStyle1.ForeColor = SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = SystemColors.ControlLightLight;
-            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
-            dataGridViewMaster.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = SystemColors.ButtonShadow;
+            dataGridViewCellStyle2.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            dataGridViewCellStyle2.ForeColor = SystemColors.WindowText;
+            dataGridViewCellStyle2.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = SystemColors.ControlLightLight;
+            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.True;
+            dataGridViewMaster.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
             dataGridViewMaster.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dataGridViewMaster.Columns.AddRange(new DataGridViewColumn[] { Customer, NumOfOrder, Date, dateOfFinish, stateOfOrder });
             dataGridViewMaster.EnableHeadersVisualStyles = false;
@@ -300,7 +331,7 @@
             dataGridViewMaster.Location = new Point(224, 20);
             dataGridViewMaster.Name = "dataGridViewMaster";
             dataGridViewMaster.RowTemplate.Height = 25;
-            dataGridViewMaster.Size = new Size(1603, 985);
+            dataGridViewMaster.Size = new Size(1657, 985);
             dataGridViewMaster.TabIndex = 1;
             // 
             // Customer
@@ -332,6 +363,14 @@
             stateOfOrder.HeaderText = "Stav";
             stateOfOrder.Name = "stateOfOrder";
             // 
+            // mainPanel
+            // 
+            mainPanel.Dock = DockStyle.Fill;
+            mainPanel.Location = new Point(186, 0);
+            mainPanel.Name = "mainPanel";
+            mainPanel.Size = new Size(1728, 1041);
+            mainPanel.TabIndex = 2;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -339,12 +378,14 @@
             AutoSize = true;
             BackColor = Color.FromArgb(46, 51, 73);
             ClientSize = new Size(1914, 1041);
+            Controls.Add(mainPanel);
             Controls.Add(dataGridViewMaster);
             Controls.Add(panel1);
             Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "MainForm";
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "Řízení zakázek";
+            Text = "Řízení zakázek - Software dělaný na míru";
             Load += Form1_Load;
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
@@ -360,7 +401,7 @@
         private Panel panel1;
         private Panel panel2;
         private PictureBox pictureBox1;
-        private Label userName;
+        private Label appName;
         private Button BtnDashboard;
         private Label OrganizationName;
         private Button BtnSettings;
@@ -380,5 +421,6 @@
         private DataGridViewTextBoxColumn dateOfFinish;
         private DataGridViewTextBoxColumn stateOfOrder;
         private Label label1;
+        private Panel mainPanel;
     }
 }
