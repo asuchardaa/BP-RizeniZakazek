@@ -6,10 +6,14 @@ using System.Threading.Tasks;
 
 namespace BP_rizeni_zakazek.utils
 {
-    internal class CSVManager
+    internal class CsvManager
     {
+        private List<string> loadedFiles = new List<string>();
 
-        private HashSet<string> loadedFiles = new HashSet<string>();
+        public List<string> GetLoadedFiles()
+        {
+            return loadedFiles;
+        }
 
         /// <summary>
         /// Metoda pro najití čísla objednávky ve vstupním CSV souboru
@@ -24,6 +28,7 @@ namespace BP_rizeni_zakazek.utils
                 string[] fields = lines[1].Split(';');
                 return fields[1].Trim();
             }
+
             return null;
         }
 
@@ -43,17 +48,19 @@ namespace BP_rizeni_zakazek.utils
         /// <param name="filePath"></param>
         public void AddLoadedFile(string filePath)
         {
-            loadedFiles.Add(filePath);
+            if (!loadedFiles.Contains(filePath))
+            {
+                loadedFiles.Add(filePath);
+            }
         }
 
         /// <summary>
         /// Metoda pro odebrání nahrávaného souboru ze seznamu nahrátých souborů
         /// </summary>
         /// <param name="filePath"></param>
-        public void OdebratNactenySoubor(string filePath)
+        public void RemoveLoadedFile(string filePath)
         {
             loadedFiles.Remove(filePath);
         }
-
     }
 }

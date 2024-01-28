@@ -11,14 +11,14 @@ namespace BP_rizeni_zakazek.Tests
     [TestFixture]
     internal class CSVManagerTests
     {
-        private CSVManager _csvManager;
+        private CsvManager _csvManager;
         private string testFilePath;
 
 
         [SetUp]
         public void Setup()
         {
-            _csvManager = new CSVManager();
+            _csvManager = new CsvManager();
             testFilePath = Path.GetTempFileName();
             //File.WriteAllLines(testFilePath, new[] { "Header", "Zakazka;12345;Ostatni" });
 

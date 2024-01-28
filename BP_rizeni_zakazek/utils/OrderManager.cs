@@ -84,12 +84,40 @@ namespace BP_rizeni_zakazek.utils
                 case "Nezadáno":
                     color = Color.LightBlue;
                     break;
+                case "Více kusů":
+                    color = Color.Coral;
+                    break;
                 default:
                     color = Color.Red;
                     break;
             }
 
             cell.Style.BackColor = color;
+        }
+
+        /// <summary>
+        /// Metoda pro opětovnou aktualizaci barvy buňky dle stavu objednávky
+        /// </summary>
+        /// <param name="masterRow"></param>
+        /// <param name="status"></param>
+        public void UpdateColorStatusOrders(DataGridViewRow masterRow, string status)
+        {
+            if (status == "Hotovo")
+            {
+                masterRow.Cells[5].Style.BackColor = System.Drawing.Color.Green;
+            }
+            else if (status == "Rozpracováno")
+            {
+                masterRow.Cells[5].Style.BackColor = System.Drawing.Color.Yellow;
+            }
+            else if (status == "Nezadáno")
+            {
+                masterRow.Cells[5].Style.BackColor = System.Drawing.Color.LightBlue;
+            }
+            else
+            {
+                masterRow.Cells[5].Style.BackColor = System.Drawing.Color.LightGray;
+            }
         }
 
         /// <summary>
@@ -103,6 +131,10 @@ namespace BP_rizeni_zakazek.utils
             {
                 string formattedDate = DateTime.Now.ToString("dd/MM/yyyy");
                 row.Cells["dateOfFinish"].Value = formattedDate;
+            }
+            else
+            {
+                row.Cells["dateOfFinish"].Value = "";
             }
         }
 
@@ -157,8 +189,12 @@ namespace BP_rizeni_zakazek.utils
             {
                 return "Hotovo";
             }
+            else if (numCreated > numOriginalAmount)
+            {
+                return "Více kusů";
+            }
 
-            return "Špatně";
+            return "Špatně/Chyba";
         }
 
         /// <summary>
@@ -181,9 +217,96 @@ namespace BP_rizeni_zakazek.utils
                     return Color.Yellow;
                 case "hotovo":
                     return Color.Green;
+                case "více kusů":
+                    return Color.Coral;
                 default:
                     return Color.White;
             }
+        }
+
+        /// <summary>
+        /// Metoda pro určení stavu zakázky po opětovném nahrání json souboru nebo editaci
+        /// </summary>
+        /// <param name="detailData"></param>
+        /// <returns></returns>
+        public string DetermineOrderStatusList(List<string[]> detailData)
+        {
+            bool anyInProgressOrComplete = false;
+            bool allDone = true;
+
+            foreach (var row in detailData)
+            {
+                string status = row[9];
+
+                if (status.Equals("Hotovo", StringComparison.OrdinalIgnoreCase))
+                {
+                    anyInProgressOrComplete = true; // alespoň jeden status "Hotovo"
+                }
+                else
+                {
+                    allDone = false;
+                    if (status.Equals("Rozpracováno", StringComparison.OrdinalIgnoreCase) ||
+                        status.Equals("Hotovo", StringComparison.OrdinalIgnoreCase))
+                    {
+                        anyInProgressOrComplete = true; // alespoň jeden "Rozpracovano" nebo "Hotovo"
+                    }
+                }
+            }
+
+            if (allDone)
+            {
+                return "Hotovo";
+            }
+            else if (anyInProgressOrComplete)
+            {
+                return "Rozpracováno";
+            }
+            else
+            {
+                return "Nezadáno";
+            }
+
+            return "Nezadáno";
+        }
+
+        /// <summary>
+        /// Metoda pro určení nového stavu objednávky po editu
+        /// </summary>
+        /// <param name="created"></param>
+        /// <param name="amount"></param>
+        /// <param name="curve"></param>
+        /// <returns></returns>
+        public string DetermineTheNewStatus(string created, string amount, string curve)
+        {
+            if (string.IsNullOrEmpty(created) || string.IsNullOrEmpty(amount))
+            {
+                return "Neznámý";
+            }
+
+            if (int.TryParse(created, out int createdInt) && int.TryParse(amount, out int amountInt))
+            {
+                if (createdInt == amountInt)
+                {
+                    if (curve.Equals("NE", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return "Hotovo";
+                    }
+                    if (curve.Equals("ANO", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return "Rozpracováno";
+                    }
+                }
+                else if (createdInt < amountInt)
+                {
+                    return "Rozpracováno";
+                }
+                else if (createdInt > amountInt)
+                {
+                    return "Více kusů";
+                }
+            }
+
+            return "Neplatný status";
         }
     }
 }

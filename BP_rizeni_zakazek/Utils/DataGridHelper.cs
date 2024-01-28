@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BP_rizeni_zakazek.utils
 {
-    internal class DataGridViewHelper
+    internal class DataGridHelper
     {
 
         private OrderManager _orderManager = new OrderManager();
@@ -40,5 +40,7 @@ namespace BP_rizeni_zakazek.utils
                 masterRow.Cells["stateOfOrder"].Value = overallStatus;
             }
         }
+
+
     }
 }

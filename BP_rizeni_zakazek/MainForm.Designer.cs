@@ -31,6 +31,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
             panel1 = new Panel();
+            label1 = new Label();
             OrderDoneOrNotDone = new ComboBox();
             FilterTextBox = new TextBox();
             BtnUploadHot = new Button();
@@ -61,6 +62,7 @@
             // panel1
             // 
             panel1.BackColor = Color.FromArgb(24, 30, 54);
+            panel1.Controls.Add(label1);
             panel1.Controls.Add(OrderDoneOrNotDone);
             panel1.Controls.Add(FilterTextBox);
             panel1.Controls.Add(BtnUploadHot);
@@ -76,13 +78,24 @@
             panel1.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
             panel1.Location = new Point(0, 0);
             panel1.Name = "panel1";
-            panel1.Size = new Size(186, 633);
+            panel1.Size = new Size(186, 1041);
             panel1.TabIndex = 0;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Font = new Font("Microsoft Sans Serif", 9.75F, FontStyle.Bold, GraphicsUnit.Point);
+            label1.ForeColor = Color.FromArgb(0, 126, 249);
+            label1.Location = new Point(60, 351);
+            label1.Name = "label1";
+            label1.Size = new Size(41, 16);
+            label1.TabIndex = 10;
+            label1.Text = "Filtry";
             // 
             // OrderDoneOrNotDone
             // 
             OrderDoneOrNotDone.FormattingEnabled = true;
-            OrderDoneOrNotDone.Location = new Point(12, 518);
+            OrderDoneOrNotDone.Location = new Point(25, 380);
             OrderDoneOrNotDone.Name = "OrderDoneOrNotDone";
             OrderDoneOrNotDone.Size = new Size(121, 23);
             OrderDoneOrNotDone.TabIndex = 9;
@@ -90,7 +103,7 @@
             // 
             // FilterTextBox
             // 
-            FilterTextBox.Location = new Point(12, 478);
+            FilterTextBox.Location = new Point(25, 418);
             FilterTextBox.Name = "FilterTextBox";
             FilterTextBox.Size = new Size(121, 23);
             FilterTextBox.TabIndex = 8;
@@ -98,7 +111,7 @@
             // 
             // BtnUploadHot
             // 
-            BtnUploadHot.Location = new Point(93, 562);
+            BtnUploadHot.Location = new Point(93, 939);
             BtnUploadHot.Name = "BtnUploadHot";
             BtnUploadHot.Size = new Size(75, 23);
             BtnUploadHot.TabIndex = 7;
@@ -108,7 +121,7 @@
             // 
             // BtnUpload
             // 
-            BtnUpload.Location = new Point(12, 562);
+            BtnUpload.Location = new Point(12, 939);
             BtnUpload.Name = "BtnUpload";
             BtnUpload.Size = new Size(75, 23);
             BtnUpload.TabIndex = 6;
@@ -132,11 +145,11 @@
             BtnSettings.Font = new Font("Nirmala UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point);
             BtnSettings.ForeColor = Color.FromArgb(0, 126, 249);
             BtnSettings.Image = (Image)resources.GetObject("BtnSettings.Image");
-            BtnSettings.Location = new Point(0, 591);
+            BtnSettings.Location = new Point(0, 999);
             BtnSettings.Name = "BtnSettings";
             BtnSettings.Size = new Size(186, 42);
             BtnSettings.TabIndex = 5;
-            BtnSettings.Text = "Settings";
+            BtnSettings.Text = "Nastavení";
             BtnSettings.TextImageRelation = TextImageRelation.TextBeforeImage;
             BtnSettings.UseVisualStyleBackColor = true;
             BtnSettings.Click += BtnSettings_Click;
@@ -154,7 +167,7 @@
             BtnArchive.Name = "BtnArchive";
             BtnArchive.Size = new Size(186, 42);
             BtnArchive.TabIndex = 4;
-            BtnArchive.Text = "Archive";
+            BtnArchive.Text = "Archiv";
             BtnArchive.TextImageRelation = TextImageRelation.TextBeforeImage;
             BtnArchive.UseVisualStyleBackColor = true;
             BtnArchive.Click += BtnArchive_Click;
@@ -172,7 +185,7 @@
             BtnCalender.Name = "BtnCalender";
             BtnCalender.Size = new Size(186, 42);
             BtnCalender.TabIndex = 3;
-            BtnCalender.Text = "Calender";
+            BtnCalender.Text = "Kalendář";
             BtnCalender.TextImageRelation = TextImageRelation.TextBeforeImage;
             BtnCalender.UseVisualStyleBackColor = true;
             BtnCalender.Click += BtnCalender_Click;
@@ -190,7 +203,7 @@
             BtnStatistics.Name = "BtnStatistics";
             BtnStatistics.Size = new Size(186, 42);
             BtnStatistics.TabIndex = 2;
-            BtnStatistics.Text = "Statistics";
+            BtnStatistics.Text = "Statistiky";
             BtnStatistics.TextImageRelation = TextImageRelation.TextBeforeImage;
             BtnStatistics.UseVisualStyleBackColor = true;
             BtnStatistics.Click += BtnStatistics_Click;
@@ -208,7 +221,7 @@
             BtnDashboard.Name = "BtnDashboard";
             BtnDashboard.Size = new Size(186, 42);
             BtnDashboard.TabIndex = 1;
-            BtnDashboard.Text = "Dashboard";
+            BtnDashboard.Text = "Hlavní stránka";
             BtnDashboard.TextImageRelation = TextImageRelation.TextBeforeImage;
             BtnDashboard.UseVisualStyleBackColor = true;
             BtnDashboard.Click += BtnDashboard_Click;
@@ -287,7 +300,7 @@
             dataGridViewMaster.Location = new Point(224, 20);
             dataGridViewMaster.Name = "dataGridViewMaster";
             dataGridViewMaster.RowTemplate.Height = 25;
-            dataGridViewMaster.Size = new Size(1112, 601);
+            dataGridViewMaster.Size = new Size(1603, 985);
             dataGridViewMaster.TabIndex = 1;
             // 
             // Customer
@@ -323,15 +336,15 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
+            AutoSize = true;
             BackColor = Color.FromArgb(46, 51, 73);
-            ClientSize = new Size(1370, 633);
+            ClientSize = new Size(1914, 1041);
             Controls.Add(dataGridViewMaster);
             Controls.Add(panel1);
             Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
-            FormBorderStyle = FormBorderStyle.FixedToolWindow;
             Name = "MainForm";
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "DU-PE - Řízení zakázek";
+            Text = "Řízení zakázek";
             Load += Form1_Load;
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
@@ -366,5 +379,6 @@
         private DataGridViewTextBoxColumn Date;
         private DataGridViewTextBoxColumn dateOfFinish;
         private DataGridViewTextBoxColumn stateOfOrder;
+        private Label label1;
     }
 }
