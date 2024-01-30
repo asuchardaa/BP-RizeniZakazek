@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NUnit.Framework.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,41 +18,61 @@ namespace BP_rizeni_zakazek.utils
         {
             if (masterRow.Tag is List<string[]> detailsList)
             {
-                bool anyInProgressOrComplete = false;
-                bool allDone = true;
+                bool allMorePieces = true;
 
                 foreach (var detail in detailsList)
                 {
                     string status = detail[9];
 
-                    if (status.Equals("Hotovo", StringComparison.OrdinalIgnoreCase))
+                    if (status != "Více kusů") 
                     {
-                        anyInProgressOrComplete = true; // alespoň jeden stav "Hotovo"
-                    }
-                    else
-                    {
-                        allDone = false;
-                        if (status.Equals("Rozpracováno", StringComparison.OrdinalIgnoreCase) ||
-                            status.Equals("Hotovo", StringComparison.OrdinalIgnoreCase))
-                        {
-                            anyInProgressOrComplete = true; // alespoň jeden "Rozpracovano" nebo "Hotovo"
-                        }
+                        allMorePieces = false;
+                        break;
                     }
                 }
 
                 string resultStatus;
 
-                if (allDone)
+                if (allMorePieces)
                 {
-                    resultStatus = "Hotovo";
-                }
-                else if (anyInProgressOrComplete)
-                {
-                    resultStatus = "Rozpracováno";
+                    resultStatus = "Více kusů";
                 }
                 else
                 {
-                    resultStatus = "Nezadáno";
+                    // tady už neřeším status více kusů -> rozpracováno, hotovo, neznámý
+                    bool anyInProgressOrComplete = false;
+                    bool allDone = true;
+
+                    foreach (var detail in detailsList)
+                    {
+                        string status = detail[9];
+
+                        if (status.Equals("Hotovo", StringComparison.OrdinalIgnoreCase))
+                        {
+                            anyInProgressOrComplete = true;
+                        }
+                        else
+                        {
+                            allDone = false;
+                            if (status.Equals("Rozpracováno", StringComparison.OrdinalIgnoreCase))
+                            {
+                                anyInProgressOrComplete = true; // alespoň jeden "Rozpracovano"
+                            }
+                        }
+                    }
+
+                    if (allDone)
+                    {
+                        resultStatus = "Hotovo";
+                    }
+                    else if (anyInProgressOrComplete)
+                    {
+                        resultStatus = "Rozpracováno";
+                    }
+                    else
+                    {
+                        resultStatus = "Nezadáno";
+                    }
                 }
 
                 DataGridViewCell statusCell = masterRow.Cells["StateOfOrder"];
@@ -64,6 +85,7 @@ namespace BP_rizeni_zakazek.utils
 
             return "Neznámý";
         }
+
 
         /// <summary>
         /// Metoda pro nastavení barvy buňky dle stavu objednávky
@@ -113,6 +135,10 @@ namespace BP_rizeni_zakazek.utils
             else if (status == "Nezadáno")
             {
                 masterRow.Cells[5].Style.BackColor = System.Drawing.Color.LightBlue;
+            }
+            else if (status == "Více kusů")
+            {
+                masterRow.Cells[5].Style.BackColor = System.Drawing.Color.Coral;
             }
             else
             {

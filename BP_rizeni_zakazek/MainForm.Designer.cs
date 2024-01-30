@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
             panel1 = new Panel();
             label1 = new Label();
             OrderDoneOrNotDone = new ComboBox();
@@ -104,15 +104,16 @@
             OrderDoneOrNotDone.FormattingEnabled = true;
             OrderDoneOrNotDone.Location = new Point(25, 399);
             OrderDoneOrNotDone.Name = "OrderDoneOrNotDone";
-            OrderDoneOrNotDone.Size = new Size(121, 23);
+            OrderDoneOrNotDone.Size = new Size(131, 23);
             OrderDoneOrNotDone.TabIndex = 9;
             OrderDoneOrNotDone.SelectedIndexChanged += comboBox1_OrderDoneOrNotDone;
             // 
             // FilterTextBox
             // 
-            FilterTextBox.Location = new Point(25, 442);
+            FilterTextBox.Location = new Point(25, 450);
             FilterTextBox.Name = "FilterTextBox";
-            FilterTextBox.Size = new Size(121, 23);
+            FilterTextBox.PlaceholderText = "Vyhledat zakázku";
+            FilterTextBox.Size = new Size(131, 23);
             FilterTextBox.TabIndex = 8;
             FilterTextBox.TextChanged += FilterTextBox_TextChanged;
             // 
@@ -316,14 +317,14 @@
             dataGridViewMaster.BackgroundColor = SystemColors.ActiveCaption;
             dataGridViewMaster.BorderStyle = BorderStyle.None;
             dataGridViewMaster.CellBorderStyle = DataGridViewCellBorderStyle.None;
-            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = SystemColors.ButtonShadow;
-            dataGridViewCellStyle2.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
-            dataGridViewCellStyle2.ForeColor = SystemColors.WindowText;
-            dataGridViewCellStyle2.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = SystemColors.ControlLightLight;
-            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.True;
-            dataGridViewMaster.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = SystemColors.ButtonShadow;
+            dataGridViewCellStyle1.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            dataGridViewCellStyle1.ForeColor = SystemColors.WindowText;
+            dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = SystemColors.ControlLightLight;
+            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
+            dataGridViewMaster.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dataGridViewMaster.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dataGridViewMaster.Columns.AddRange(new DataGridViewColumn[] { Customer, NumOfOrder, Date, dateOfFinish, stateOfOrder });
             dataGridViewMaster.EnableHeadersVisualStyles = false;
@@ -366,9 +367,9 @@
             // mainPanel
             // 
             mainPanel.Dock = DockStyle.Fill;
-            mainPanel.Location = new Point(186, 0);
+            mainPanel.Location = new Point(0, 0);
             mainPanel.Name = "mainPanel";
-            mainPanel.Size = new Size(1728, 1041);
+            mainPanel.Size = new Size(1914, 1041);
             mainPanel.TabIndex = 2;
             // 
             // MainForm
@@ -378,9 +379,9 @@
             AutoSize = true;
             BackColor = Color.FromArgb(46, 51, 73);
             ClientSize = new Size(1914, 1041);
+            Controls.Add(panel1);
             Controls.Add(mainPanel);
             Controls.Add(dataGridViewMaster);
-            Controls.Add(panel1);
             Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "MainForm";
