@@ -38,8 +38,8 @@ namespace BP_rizeni_zakazek
         private Dictionary<string, string> vstupniMaterialy = new Dictionary<string, string>();
         private Dictionary<string, string> vystupniMaterialy = new Dictionary<string, string>();
 
-        private protected string jsonFilePath = "C:\\Users\\Adam\\Documents\\TUL\\SZZ\\BP\\data\\orders.json";
-        private protected string logFilePath = "C:\\Users\\Adam\\Documents\\TUL\\SZZ\\BP\\data\\log.json";
+        private protected string jsonFilePath = "C:\\Users\\Adam\\Documents\\TUL\\SZZ\\BP\\data";
+        private protected string logFilePath = "C:\\Users\\Adam\\Documents\\TUL\\SZZ\\BP\\data";
         private protected string csvZakFilePath = "C:\\Users\\Adam\\Documents\\TUL\\SZZ\\BP\\importZak";
         private protected string csvHotFilePath = "C:\\Users\\Adam\\Documents\\TUL\\SZZ\\BP\\importHotov";
 
@@ -134,15 +134,28 @@ namespace BP_rizeni_zakazek
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
 
-            if (!File.Exists(logFilePath))
+            try
             {
-                string computerName = Environment.MachineName;
-                File.WriteAllText(logFilePath, JsonConvert.SerializeObject(new { ComputerName = computerName }));
-                EnableEditing(true);
+                if (!File.Exists(logFilePath))
+                {
+                    string computerName = Environment.MachineName;
+                    File.WriteAllText(logFilePath, JsonConvert.SerializeObject(new { ComputerName = computerName }));
+                    EnableEditing(true);
+                }
+                else
+                {
+                    EnableEditing(false);
+                }
             }
-            else
+            catch (UnauthorizedAccessException ex)
             {
-                EnableEditing(false);
+                MessageBox.Show($"Nemáte oprávnění zapisovat do umístění: {logFilePath}", "Chyba přístupu",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Došlo k chybě při přístupu k souboru: {ex.Message}", "Chyba",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

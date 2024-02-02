@@ -22,7 +22,7 @@ namespace BP_rizeni_zakazek.Services
         /// <param name="messageDisplayer"></param>
         public PasswordUtils(IMessageDisplayer messageDisplayer)
         {
-            _messageDisplayer = messageDisplayer;
+            _messageDisplayer = new MessageBoxDisplayer();
         }
 
         /// <summary>
@@ -63,8 +63,24 @@ namespace BP_rizeni_zakazek.Services
             }
             catch (Exception ex)
             {
-                _messageDisplayer.ShowMessage($"Chyba při manipulaci se souborem: {ex.Message}", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
+                try
+                {
+                    if (_messageDisplayer != null)
+                    {
+                        _messageDisplayer.ShowMessage($"Chyba při manipulaci se souborem: {ex.Message}", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    else
+                    {
+                        // Alternativní způsob zobrazení chyby, pokud _messageDisplayer je null.
+                        Console.WriteLine($"Něco se pokazilo: {ex.Message}"); // Případně zde použijte jiný mechanismus.
+                    }
+                }
+                catch (Exception internalEx)
+                {
+                    // Zpracování výjimky, která by mohla nastat během ošetřování původní výjimky.
+                    Console.WriteLine($"Došlo k interní chybě při ošetřování výjimky: {internalEx.Message}");
+                    // Zde můžete přidat další logiku pro logování nebo zobrazení chyby uživateli pomocí jiné metody.
+                }
             }
         }
 
