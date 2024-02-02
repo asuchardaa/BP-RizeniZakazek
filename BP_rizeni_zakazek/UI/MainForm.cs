@@ -2,9 +2,12 @@
 using System.Text;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
-using BP_rizeni_zakazek.utils;
 using Newtonsoft.Json;
 using System.Windows.Forms;
+using BP_rizeni_zakazek.Helpers;
+using BP_rizeni_zakazek.Managers;
+using BP_rizeni_zakazek.Services;
+using BP_rizeni_zakazek.Interfaces;
 
 namespace BP_rizeni_zakazek
 
@@ -25,9 +28,10 @@ namespace BP_rizeni_zakazek
             int nHeightEllipse
         );
 
-        private CsvManager _csvManager = new CsvManager();
         private DataGridHelper _dataGridHelper = new DataGridHelper();
         private OrderManager _orderManager = new OrderManager();
+        private PasswordUtils _passwordUtils = new PasswordUtils();
+        private readonly DebugHelper _debugHelper = new DebugHelper();
 
         private Dictionary<int, DataGridView> detailGrids = new Dictionary<int, DataGridView>();
 
@@ -39,13 +43,16 @@ namespace BP_rizeni_zakazek
         private protected string csvZakFilePath = "C:\\Users\\Adam\\Documents\\TUL\\SZZ\\BP\\importZak";
         private protected string csvHotFilePath = "C:\\Users\\Adam\\Documents\\TUL\\SZZ\\BP\\importHotov";
 
-        private const string hashedPassword = "94e3de58eaa0bfb3222034aa4c8f4d992abd110da905466884ac983c4dcd423f";
         private bool isPasswordPromptShown = false;
 
+        private readonly IMessageDisplayer _messageDisplayer;
+        private readonly IDataManager _dataManager;
 
         public MainForm()
         {
             InitializeComponent();
+            _dataManager = new FileManager();
+            _messageDisplayer = new MessageBoxDisplayer();
             Region = Region.FromHrgn(CreateRoundRectRgn(0, 0, Width, Height, 25, 25));
             NavPnl.Height = BtnDashboard.Height;
             NavPnl.Top = BtnDashboard.Top;
@@ -76,7 +83,7 @@ namespace BP_rizeni_zakazek
                 File.Delete(logFilePath);
             }
 
-            Debug.WriteLine(GetCallingMethodName());
+            Debug.WriteLine(_debugHelper.GetCallingMethodName());
 
             SaveDataToJson(jsonFilePath);
         }
@@ -300,24 +307,6 @@ namespace BP_rizeni_zakazek
         }
 
         /// <summary>
-        /// Metoda, která se provede po zavření formuláře s nastavením
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void SettingsForm_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            var settingsForm = sender as settingsForm;
-            if (settingsForm.DialogResult == DialogResult.OK)
-            {
-                PromptForPassword(settingsForm);
-            }
-
-            mainPanel.BackColor = Properties.Settings.Default.BackColor;
-            Properties.Settings.Default.Save();
-        }
-
-
-        /// <summary>
         /// Metoda pro zobrazení efektu při najetí na tlačítko Dashboard
         /// </summary>
         /// <param name="sender"></param>
@@ -431,9 +420,26 @@ namespace BP_rizeni_zakazek
         }
 
         /// <summary>
+        /// Metoda, která se provede po zavření formuláře s nastavením
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SettingsForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            var settingsForm = sender as settingsForm;
+            if (settingsForm.DialogResult == DialogResult.OK)
+            {
+                PromptForPassword(settingsForm);
+            }
+
+            mainPanel.BackColor = Properties.Settings.Default.BackColor;
+            Properties.Settings.Default.Save();
+        }
+
+        /// <summary>
         /// Metoda pro zobrazení formuláře pro zadání hesla
         /// </summary>
-        private void PromptForPassword(settingsForm settings)
+        public void PromptForPassword(settingsForm settings)
         {
             if (isPasswordPromptShown)
             {
@@ -459,7 +465,7 @@ namespace BP_rizeni_zakazek
 
             confirmButton.Click += (sender, e) =>
             {
-                if (VerifyPassword(txtPassword.Text))
+                if (_passwordUtils.VerifyPassword(txtPassword.Text))
                 {
                     dataGridViewMaster.Visible = false;
                     SaveSettings(settings.SelectedPathOrdAndLog, settings.SelectedPathCsvZak,
@@ -502,8 +508,8 @@ namespace BP_rizeni_zakazek
                 string newJsonFilePath = Path.Combine(newPathOrdAndLog, "orders.json");
                 string newLogFilePath = Path.Combine(newPathOrdAndLog, "log.json");
 
-                MoveOrCreateFile(jsonFilePath, newJsonFilePath);
-                MoveOrCreateFile(logFilePath, newLogFilePath, true);
+                _passwordUtils.MoveOrCreateFile(jsonFilePath, newJsonFilePath);
+                _passwordUtils.MoveOrCreateFile(logFilePath, newLogFilePath, true);
 
                 jsonFilePath = newJsonFilePath;
                 logFilePath = newLogFilePath;
@@ -528,78 +534,12 @@ namespace BP_rizeni_zakazek
 
             Properties.Settings.Default.Save();
 
-            MessageBox.Show("Pro aplikování změn je nutný restart aplikace. Aplikace nyní bude restartována.",
+            _messageDisplayer.ShowMessage(
+                "Pro aplikování změn je nutný restart aplikace. Aplikace nyní bude restartována.",
                 "Upozornění o restartu aplikace", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
             Application.Restart();
             Environment.Exit(0);
-        }
-
-
-        /// <summary>
-        /// Pomocná metoda pro přesunutí popř. vytvoření souboru do nového adresáře
-        /// </summary>
-        /// <param name="oldPath"></param>
-        /// <param name="newPath"></param>
-        /// <param name="isLogFile"></param>
-        private void MoveOrCreateFile(string oldPath, string newPath, bool isLogFile = false)
-        {
-            try
-            {
-                if (isLogFile)
-                {
-                    if (File.Exists(oldPath))
-                    {
-                        File.Delete(oldPath);
-                    }
-                }
-                else
-                {
-                    if (File.Exists(oldPath))
-                    {
-                        File.Move(oldPath, newPath, true);
-                    }
-                    else if (!File.Exists(newPath))
-                    {
-                        File.Create(newPath).Close();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Chyba při manipulaci se souborem: {ex.Message}", "Chyba", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-            }
-        }
-
-        /// <summary>
-        /// Metoda pro ověření hesla
-        /// </summary>
-        /// <param name="inputPassword"></param>
-        /// <returns></returns>
-        private bool VerifyPassword(string inputPassword)
-        {
-            return ComputeSha256Hash(inputPassword) == hashedPassword;
-        }
-
-        /// <summary>
-        /// Metoda pro výpočet SHA256 hashe
-        /// </summary>
-        /// <param name="rawData"></param>
-        /// <returns></returns>
-        private string ComputeSha256Hash(string rawData)
-        {
-            using (SHA256 sha256Hash = SHA256.Create())
-            {
-                byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(rawData));
-
-                StringBuilder builder = new StringBuilder();
-                for (int i = 0; i < bytes.Length; i++)
-                {
-                    builder.Append(bytes[i].ToString("x2"));
-                }
-
-                return builder.ToString();
-            }
         }
 
         /// <summary>
@@ -635,12 +575,16 @@ namespace BP_rizeni_zakazek
         }
 
         /// <summary>
-        /// Metoda pro povolení editu -> závislí na tom, zda je soubor s logem
+        /// Metoda pro povolení editu v závislosti na existenci souboru log.json
         /// </summary>
         /// <param name="canEdit"></param>
         private void EnableEditing(bool canEdit)
         {
-            dataGridViewMaster.ReadOnly = !canEdit;
+            if (dataGridViewMaster != null)
+            {
+                dataGridViewMaster.ReadOnly = !canEdit;
+            }
+
             foreach (var detailGrid in detailGrids.Values)
             {
                 detailGrid.ReadOnly = !canEdit;
@@ -726,10 +670,10 @@ namespace BP_rizeni_zakazek
                     var filePath = openFileDialog.FileName;
                     string fileName = Path.GetFileName(filePath);
 
-                    string cisloObjednavky = _csvManager.FindNumberOfOrder_CSV(filePath);
+                    string cisloObjednavky = _dataManager.FindNumberOfOrder_CSV(filePath);
 
                     // Kontrola duplicity
-                    if (_csvManager.isFileLoaded(fileName))
+                    if (_dataManager.isFileLoaded(fileName))
                     {
                         DialogResult dialogResult = MessageBox.Show(
                             $"Soubor {fileName} již byl nahrán. Chcete jej nahrát znovu a přepsat existující data?",
@@ -749,7 +693,7 @@ namespace BP_rizeni_zakazek
                     }
                     else
                     {
-                        _csvManager.AddLoadedFile(fileName);
+                        _dataManager.AddLoadedFile(fileName);
                     }
 
                     string[] lines = File.ReadAllLines(filePath, Encoding.UTF8);
@@ -765,7 +709,7 @@ namespace BP_rizeni_zakazek
                             string material = fields[3].Trim();
 
                             vstupniMaterialy[cestaKSouboru] = material;
-                            rowIndex = FindOrAddMasterRow(fields);
+                            rowIndex = _dataGridHelper.FindOrAddMasterRow(dataGridViewMaster, fields);
                             dataGridViewMaster.Rows[rowIndex].Cells["ExpandDetails"].Value = "+";
                             dataGridViewMaster.Rows[rowIndex].Cells["FileNameColumn"].Value = fileName;
 
@@ -775,41 +719,13 @@ namespace BP_rizeni_zakazek
                     }
 
                     _dataGridHelper.UpdateAllMasterGridRowStatuses(dataGridViewMaster);
-                    Debug.WriteLine(GetCallingMethodName());
+                    Debug.WriteLine(_debugHelper.GetCallingMethodName());
 
                     SaveDataToJson(jsonFilePath);
                 }
             }
         }
 
-        /// <summary>
-        /// Metoda pro najití nebo přidání master řádku
-        /// </summary>
-        /// <param name="fields"></param>
-        /// <returns></returns>
-        private int FindOrAddMasterRow(string[] fields)
-        {
-            string customer = fields[0].Trim();
-            string orderNumber = fields[1].Trim();
-            string date = fields[8].Trim();
-
-            for (int i = 0; i < dataGridViewMaster.Rows.Count; i++)
-            {
-                if (dataGridViewMaster.Rows[i].Cells["Customer"].Value.ToString() == customer &&
-                    dataGridViewMaster.Rows[i].Cells["NumOfOrder"].Value.ToString() == orderNumber)
-                {
-                    return i;
-                }
-            }
-
-            int rowIndex = dataGridViewMaster.Rows.Add();
-            dataGridViewMaster.Rows[rowIndex].Cells["Customer"].Value = customer;
-            dataGridViewMaster.Rows[rowIndex].Cells["NumOfOrder"].Value = orderNumber;
-            dataGridViewMaster.Rows[rowIndex].Cells["Date"].Value = date;
-            dataGridViewMaster.Rows[rowIndex].Tag = new List<string[]>();
-
-            return rowIndex;
-        }
 
         /// <summary>
         /// Metoda pro update nebo přidání detailGridu
@@ -853,21 +769,7 @@ namespace BP_rizeni_zakazek
             else
             {
                 var detailGrid = detailGrids[masterRowIndex];
-                UpdateDetailGrid(detailGrid, detailsList);
-            }
-        }
-
-        /// <summary>
-        /// Metoda pro aktualizaci detailGridu
-        /// </summary>
-        /// <param name="detailGrid"></param>
-        /// <param name="detailsList"></param>
-        private void UpdateDetailGrid(DataGridView detailGrid, List<string[]> detailsList)
-        {
-            detailGrid.Rows.Clear();
-            foreach (var detail in detailsList)
-            {
-                detailGrid.Rows.Add(detail.Skip(2).Take(detailGrid.Columns.Count).ToArray());
+                _dataGridHelper.UpdateDetailGrid(detailGrid, detailsList);
             }
         }
 
@@ -916,7 +818,7 @@ namespace BP_rizeni_zakazek
                 if (result == DialogResult.Yes)
                 {
                     string fileName = dataGridViewMaster.Rows[e.RowIndex].Cells["FileNameColumn"].Value?.ToString();
-                    _csvManager.RemoveLoadedFile(fileName);
+                    _dataManager.RemoveLoadedFile(fileName);
 
                     dataGridViewMaster.Rows.RemoveAt(e.RowIndex);
 
@@ -926,7 +828,7 @@ namespace BP_rizeni_zakazek
                         detailGrids.Remove(e.RowIndex);
                     }
 
-                    Debug.WriteLine(GetCallingMethodName());
+                    Debug.WriteLine(_debugHelper.GetCallingMethodName());
 
                     SaveDataToJson(jsonFilePath);
                 }
@@ -1089,7 +991,7 @@ namespace BP_rizeni_zakazek
                 dataGridViewMaster.Rows[rowIndex].Cells["ExpandDetails"].Value = "+";
             }
 
-            Debug.WriteLine(GetCallingMethodName());
+            Debug.WriteLine(_debugHelper.GetCallingMethodName());
 
             SaveDataToJson(jsonFilePath);
 
@@ -1112,6 +1014,7 @@ namespace BP_rizeni_zakazek
             if (e.ColumnIndex == grid.Columns["DeleteColumn"].Index)
             {
                 var nazevPoložky = grid.Rows[e.RowIndex].Cells["nazev"].Value?.ToString() ?? "neznámá položka";
+
                 var result = MessageBox.Show($"Opravdu chcete smazat položku '{nazevPoložky}'?", "Potvrzení smazání",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
 
@@ -1154,7 +1057,7 @@ namespace BP_rizeni_zakazek
                     Debug.WriteLine("Načtený soubor: " + filePath);
 
                     // Kontrola duplicity
-                    if (_csvManager.isFileLoaded(fileName))
+                    if (_dataManager.isFileLoaded(fileName))
                     {
                         DialogResult dialogResult = MessageBox.Show(
                             "Soubor s názvem '" + Path.GetFileName(fileName) +
@@ -1168,7 +1071,7 @@ namespace BP_rizeni_zakazek
                     }
                     else
                     {
-                        _csvManager.AddLoadedFile(fileName);
+                        _dataManager.AddLoadedFile(fileName);
                     }
 
                     string[] lines = File.ReadAllLines(filePath, Encoding.UTF8);
@@ -1197,7 +1100,7 @@ namespace BP_rizeni_zakazek
                     }
 
                     _dataGridHelper.UpdateAllMasterGridRowStatuses(dataGridViewMaster);
-                    Debug.WriteLine(GetCallingMethodName());
+                    Debug.WriteLine(_debugHelper.GetCallingMethodName());
 
                     SaveDataToJson(jsonFilePath);
                     Debug.WriteLine("Aktualizace stavů master grid dokončena.");
@@ -1222,18 +1125,11 @@ namespace BP_rizeni_zakazek
                 string novyStavObjednavky =
                     _orderManager.DetermineTheNewStatus(totalCreated.ToString(), pocet, detail[6]);
                 detail[9] = novyStavObjednavky;
-                Debug.WriteLine(GetCallingMethodName());
+                Debug.WriteLine(_debugHelper.GetCallingMethodName());
 
                 SaveDataToJson(jsonFilePath);
                 Debug.WriteLine($"Aktualizovaný detail: {String.Join(", ", detail)}");
             }
-        }
-
-        static string GetCallingMethodName()
-        {
-            var stackTrace = new StackTrace();
-            var callingMethod = stackTrace.GetFrame(1).GetMethod();
-            return callingMethod.Name;
         }
 
         /// <summary>
@@ -1325,7 +1221,7 @@ namespace BP_rizeni_zakazek
 
                 _orderManager.UpdateColorStatusOrders(dataGridViewMaster.Rows[masterRowIndex], celkovýStav);
                 _dataGridHelper.UpdateAllMasterGridRowStatuses(dataGridViewMaster);
-                Debug.WriteLine(GetCallingMethodName());
+                Debug.WriteLine(_debugHelper.GetCallingMethodName());
 
                 SaveDataToJson(jsonFilePath);
             }
@@ -1342,38 +1238,38 @@ namespace BP_rizeni_zakazek
         /// <param name="filePath"></param>
         private void SaveDataToJson(string filePath)
         {
-            // Shromažďování dat z hlavního DataGridView
+            // masterGrid
             var masterGridData = dataGridViewMaster.Rows
                 .Cast<DataGridViewRow>()
                 .Where(r => !r.IsNewRow)
                 .Select(r => r.Cells.Cast<DataGridViewCell>().Select(c => c.Value?.ToString() ?? "").ToArray())
                 .ToList();
 
-            // Příprava dat detailGridů pro serializaci
+            // detailGrid
             var detailGridsData = new Dictionary<int, List<string[]>>();
             foreach (DataGridViewRow row in dataGridViewMaster.Rows)
             {
                 if (!row.IsNewRow && row.Tag is List<string[]> detailData)
                 {
                     int rowIndex = row.Index;
-                    // Filtrace pouze relevantních dat z detailData
+                    // musím filtrovat, byly tam nějaké věci navíc
                     var filteredDetailData =
                         detailData.Select(detail => detail.Where((s, index) => index < 10).ToArray()).ToList();
                     detailGridsData[rowIndex] = filteredDetailData;
                 }
             }
 
-            // Příprava dat pro serializaci
+            // serializace
             var data = new
             {
                 MasterGridData = masterGridData,
                 DetailGridsData = detailGridsData,
-                LoadedFiles = _csvManager.GetLoadedFiles()
+                LoadedFiles = _dataManager.GetLoadedFiles()
             };
 
             try
             {
-                // Serializace dat do JSON a uložení do souboru
+                // finální serializace
                 string json = JsonConvert.SerializeObject(data, Formatting.Indented);
                 File.WriteAllText(filePath, json);
                 Debug.WriteLine($"Data byla úspěšně uložena do JSON souboru s cestou {filePath}");
@@ -1423,7 +1319,7 @@ namespace BP_rizeni_zakazek
                 var loadedFileNames = jsonData.LoadedFiles.ToObject<List<string>>();
                 foreach (var fileName in loadedFileNames)
                 {
-                    _csvManager.AddLoadedFile(fileName);
+                    _dataManager.AddLoadedFile(fileName);
                 }
 
                 var masterGridData = jsonData.MasterGridData.ToObject<List<string[]>>();
@@ -1455,7 +1351,7 @@ namespace BP_rizeni_zakazek
 
                         if (detailGrids.TryGetValue(masterRowIndex, out var existingDetailGrid))
                         {
-                            UpdateDetailGrid(existingDetailGrid, detailsList);
+                            _dataGridHelper.UpdateDetailGrid(existingDetailGrid, detailsList);
                             existingDetailGrid.CellFormatting +=
                                 new DataGridViewCellFormattingEventHandler(DetailDataGridView_CellFormatting);
                         }

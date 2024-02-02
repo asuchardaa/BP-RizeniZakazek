@@ -5,16 +5,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BP_rizeni_zakazek.utils
+namespace BP_rizeni_zakazek.Managers
 {
-    internal class OrderManager
+    /// <summary>
+    /// Třída pro metody pracující se zakázkami a jejími položkami
+    /// </summary>
+    internal class OrderManager : BaseManager
     {
         /// <summary>
         /// Metoda pro určení celkového stavu zakázky
         /// </summary>
         /// <param name="masterRow"></param>
         /// <returns></returns>
-        public string CalculateOverallStatus(DataGridViewRow masterRow, DataGridView gridView)
+        public override string CalculateOverallStatus(DataGridViewRow masterRow, DataGridView gridView)
         {
             if (masterRow.Tag is List<string[]> detailsList)
             {
@@ -24,7 +27,7 @@ namespace BP_rizeni_zakazek.utils
                 {
                     string status = detail[9];
 
-                    if (status != "Více kusů") 
+                    if (status != "Více kusů")
                     {
                         allMorePieces = false;
                         break;
@@ -92,7 +95,7 @@ namespace BP_rizeni_zakazek.utils
         /// </summary>
         /// <param name="cell"></param>
         /// <param name="status"></param>
-        public void SetOrderCellColor(DataGridViewCell cell, string status)
+        public override void SetOrderCellColor(DataGridViewCell cell, string status)
         {
             Color color;
             switch (status)
@@ -122,27 +125,27 @@ namespace BP_rizeni_zakazek.utils
         /// </summary>
         /// <param name="masterRow"></param>
         /// <param name="status"></param>
-        public void UpdateColorStatusOrders(DataGridViewRow masterRow, string status)
+        public override void UpdateColorStatusOrders(DataGridViewRow masterRow, string status)
         {
             if (status == "Hotovo")
             {
-                masterRow.Cells[5].Style.BackColor = System.Drawing.Color.Green;
+                masterRow.Cells[5].Style.BackColor = Color.Green;
             }
             else if (status == "Rozpracováno")
             {
-                masterRow.Cells[5].Style.BackColor = System.Drawing.Color.Yellow;
+                masterRow.Cells[5].Style.BackColor = Color.Yellow;
             }
             else if (status == "Nezadáno")
             {
-                masterRow.Cells[5].Style.BackColor = System.Drawing.Color.LightBlue;
+                masterRow.Cells[5].Style.BackColor = Color.LightBlue;
             }
             else if (status == "Více kusů")
             {
-                masterRow.Cells[5].Style.BackColor = System.Drawing.Color.Coral;
+                masterRow.Cells[5].Style.BackColor = Color.Coral;
             }
             else
             {
-                masterRow.Cells[5].Style.BackColor = System.Drawing.Color.LightGray;
+                masterRow.Cells[5].Style.BackColor = Color.LightGray;
             }
         }
 
@@ -151,7 +154,7 @@ namespace BP_rizeni_zakazek.utils
         /// </summary>
         /// <param name="row"></param>
         /// <param name="status"></param>
-        public void UpdateDateOfFinish(DataGridViewRow row, string status)
+        public override void UpdateDateOfFinish(DataGridViewRow row, string status)
         {
             if (status == "Hotovo")
             {
@@ -169,7 +172,7 @@ namespace BP_rizeni_zakazek.utils
         /// </summary>
         /// <param name="row"></param>
         /// <param name="dateColumnIndex"></param>
-        public void HighlightOverdueDates(DataGridViewRow row, int dateColumnIndex)
+        public override void HighlightOverdueDates(DataGridViewRow row, int dateColumnIndex)
         {
             if (DateTime.TryParse(row.Cells[dateColumnIndex].Value?.ToString(), out DateTime cellDate))
             {
@@ -187,7 +190,7 @@ namespace BP_rizeni_zakazek.utils
         /// <param name="originalAmount"></param>
         /// <param name="curve"></param>
         /// <returns></returns>
-        public string DetermineOrderStatus(string created, string originalAmount, string curve)
+        public override string DetermineOrderStatus(string created, string originalAmount, string curve)
         {
             bool parseCreated = int.TryParse(created, out int numCreated);
             bool parseOriginalAmount = int.TryParse(originalAmount, out int numOriginalAmount);
@@ -207,6 +210,10 @@ namespace BP_rizeni_zakazek.utils
             {
                 return "Nehotovo";
             }
+            else if (numCreated > numOriginalAmount)
+            {
+                return "Více kusů";
+            }
             else if (numCreated != numOriginalAmount || curve.Equals("ANO", StringComparison.OrdinalIgnoreCase))
             {
                 return "Rozpracováno";
@@ -214,10 +221,6 @@ namespace BP_rizeni_zakazek.utils
             else if (numCreated == numOriginalAmount && curve.Equals("NE", StringComparison.OrdinalIgnoreCase))
             {
                 return "Hotovo";
-            }
-            else if (numCreated > numOriginalAmount)
-            {
-                return "Více kusů";
             }
 
             return "Špatně/Chyba";
@@ -228,7 +231,7 @@ namespace BP_rizeni_zakazek.utils
         /// </summary>
         /// <param name="status"></param>
         /// <returns></returns>
-        public Color GetColorForStatus(string status)
+        public override Color GetColorForStatus(string status)
         {
             if (string.IsNullOrEmpty(status))
             {
@@ -255,7 +258,7 @@ namespace BP_rizeni_zakazek.utils
         /// </summary>
         /// <param name="detailData"></param>
         /// <returns></returns>
-        public string DetermineOrderStatusList(List<string[]> detailData)
+        public override string DetermineOrderStatusList(List<string[]> detailData)
         {
             bool anyInProgressOrComplete = false;
             bool allDone = true;
@@ -300,7 +303,7 @@ namespace BP_rizeni_zakazek.utils
         /// <param name="amount"></param>
         /// <param name="curve"></param>
         /// <returns></returns>
-        public string DetermineTheNewStatus(string created, string amount, string curve)
+        public override string DetermineTheNewStatus(string created, string amount, string curve)
         {
             if (string.IsNullOrEmpty(created) || string.IsNullOrEmpty(amount))
             {

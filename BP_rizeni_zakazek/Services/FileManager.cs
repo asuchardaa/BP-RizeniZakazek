@@ -1,12 +1,16 @@
-﻿using System;
+﻿using BP_rizeni_zakazek.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BP_rizeni_zakazek.utils
+namespace BP_rizeni_zakazek.Services
 {
-    internal class CsvManager
+    /// <summary>
+    /// Třída pro metody spojené s prací se soubory
+    /// </summary>
+    internal class FileManager : IDataManager
     {
         private List<string> loadedFiles = new List<string>();
 
@@ -62,5 +66,7 @@ namespace BP_rizeni_zakazek.utils
         {
             loadedFiles.Remove(filePath);
         }
+
+
     }
 }

@@ -10,6 +10,9 @@ using System.Windows.Forms;
 
 namespace BP_rizeni_zakazek
 {
+    /// <summary>
+    /// Třída pro formulář s nastavením aplikace
+    /// </summary>
     public partial class settingsForm : Form
     {
 
@@ -19,9 +22,11 @@ namespace BP_rizeni_zakazek
         public bool IsPathOrdAndLogChanged { get; private set; }
         public bool IsPathCsvZakChanged { get; private set; }
         public bool IsPathCsvHotChanged { get; private set; }
-        private protected Color defaultBackColor = Color.FromArgb(46, 51, 73);
+        public Color defaultBackColor = Color.FromArgb(46, 51, 73);
 
-
+        /// <summary>
+        /// Konstruktor třídy
+        /// </summary>
         public settingsForm()
         {
             InitializeComponent();
@@ -32,6 +37,11 @@ namespace BP_rizeni_zakazek
             IsPathCsvHotChanged = false;
         }
 
+        /// <summary>
+        /// Metoda pro tlačítko pro výběr složky pro ukládání zakázek a logů
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnBrowseOrdAndLog_Click(object sender, EventArgs e)
         {
             using (FolderBrowserDialog folderBrowser = new FolderBrowserDialog())
@@ -45,12 +55,20 @@ namespace BP_rizeni_zakazek
             }
         }
 
-        private void btnSave_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Metoda pro tlačítko pro uložení změn
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        public void btnSave_Click(object sender, EventArgs e)
         {
             this.DialogResult = DialogResult.OK;
             this.Close();
         }
 
+        /// <summary>
+        /// Metoda pro tlačítko pro aktualizaci změn
+        /// </summary>
         private void UpdatePathsLabel()
         {
             textBox_OrdersPath.Text = Properties.Settings.Default.JsonFilePath;
@@ -59,6 +77,11 @@ namespace BP_rizeni_zakazek
             textBox_CsvHotPath.Text = Properties.Settings.Default.CsvHotFilePath;
         }
 
+        /// <summary>
+        /// Metoda pro tlačítko pro výběr složky pro vstupní CSV
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnCsvZak_Click(object sender, EventArgs e)
         {
             using (FolderBrowserDialog folderBrowser = new FolderBrowserDialog())
@@ -72,6 +95,11 @@ namespace BP_rizeni_zakazek
             }
         }
 
+        /// <summary>
+        /// Metoda pro tlačítko pro výběr složky pro výstupní CSV
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnCsvHot_Click(object sender, EventArgs e)
         {
             using (FolderBrowserDialog folderBrowser = new FolderBrowserDialog())
@@ -85,6 +113,11 @@ namespace BP_rizeni_zakazek
             }
         }
 
+        /// <summary>
+        /// Metoda pro tlačítko pro výběr barvy pozadí
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnChooseColor_Click(object sender, EventArgs e)
         {
             if (colorDialog.ShowDialog() == DialogResult.OK)
@@ -94,13 +127,23 @@ namespace BP_rizeni_zakazek
             }
         }
 
-        private void btnResetColor_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Metoda pro tlačítko pro reset barvy pozadí
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        public void btnResetColor_Click(object sender, EventArgs e)
         {
             Properties.Settings.Default.BackColor = defaultBackColor;
             this.BackColor = defaultBackColor;
             Properties.Settings.Default.Save();
         }
 
+        /// <summary>
+        /// Metoda pro tlačítko pro výběr obrázku
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnChooseImage_Click(object sender, EventArgs e)
         {
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
