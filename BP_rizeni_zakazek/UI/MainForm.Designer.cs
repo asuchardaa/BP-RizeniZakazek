@@ -79,7 +79,7 @@
             panel1.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
             panel1.Location = new Point(0, 0);
             panel1.Name = "panel1";
-            panel1.Size = new Size(186, 1041);
+            panel1.Size = new Size(186, 892);
             panel1.TabIndex = 0;
             // 
             // label1
@@ -164,7 +164,7 @@
             BtnSettings.ForeColor = Color.FromArgb(0, 126, 249);
             BtnSettings.Image = (Image)resources.GetObject("BtnSettings.Image");
             BtnSettings.ImageAlign = ContentAlignment.MiddleRight;
-            BtnSettings.Location = new Point(0, 999);
+            BtnSettings.Location = new Point(0, 850);
             BtnSettings.Name = "BtnSettings";
             BtnSettings.Padding = new Padding(10, 0, 0, 0);
             BtnSettings.Size = new Size(186, 42);
@@ -339,30 +339,31 @@
             // 
             Customer.HeaderText = "Zákazník";
             Customer.Name = "Customer";
-            Customer.Width = 215;
+            Customer.Width = 50;
             // 
             // NumOfOrder
             // 
             NumOfOrder.HeaderText = "Číslo objednávky";
             NumOfOrder.Name = "NumOfOrder";
-            NumOfOrder.Width = 215;
+            NumOfOrder.Width = 50;
             // 
             // Date
             // 
             Date.HeaderText = "Datum";
             Date.Name = "Date";
-            Date.Width = 198;
+            Date.Width = 50;
             // 
             // dateOfFinish
             // 
             dateOfFinish.HeaderText = "Dokončeno";
             dateOfFinish.Name = "dateOfFinish";
-            dateOfFinish.Width = 198;
+            dateOfFinish.Width = 50;
             // 
             // stateOfOrder
             // 
             stateOfOrder.HeaderText = "Stav";
             stateOfOrder.Name = "stateOfOrder";
+            stateOfOrder.Width = 50;
             // 
             // mainPanel
             // 
@@ -416,12 +417,12 @@
         private ComboBox OrderDoneOrNotDone;
         private TextBox FilterTextBox;
         private DataGridView dataGridViewMaster;
+        private Label label1;
+        private Panel mainPanel;
         private DataGridViewTextBoxColumn Customer;
         private DataGridViewTextBoxColumn NumOfOrder;
         private DataGridViewTextBoxColumn Date;
         private DataGridViewTextBoxColumn dateOfFinish;
         private DataGridViewTextBoxColumn stateOfOrder;
-        private Label label1;
-        private Panel mainPanel;
     }
 }

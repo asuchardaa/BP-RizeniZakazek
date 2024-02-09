@@ -66,9 +66,17 @@ namespace BP_rizeni_zakazek
             this.FormClosing += new FormClosingEventHandler(MainForm_FormClosing);
             this.Load += new EventHandler(MainForm_Load);
 
-            Rectangle screenSize = Screen.PrimaryScreen.WorkingArea;
-            this.Size = new Size(screenSize.Width, screenSize.Height);
+            //Rectangle screenSize = Screen.PrimaryScreen.WorkingArea;
+            //this.Size = new Size(screenSize.Width, screenSize.Height);
             this.BackColor = Properties.Settings.Default.BackColor;
+            // Nastavení počáteční velikosti formuláře
+            this.Size = new Size(800, 600); // Příklad pevně nastavené velikosti
+
+            // Nastavení vlastností pro responzivitu
+            //mainPanel.Dock = DockStyle.Fill; // mainPanel zabere celý prostor formuláře
+
+            // Příklad nastavení pro DataGridView, aby se rozšiřoval do všech směrů
+            //dataGridViewMaster.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
         }
 
         /// <summary>
@@ -134,15 +142,31 @@ namespace BP_rizeni_zakazek
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
 
-            if (!File.Exists(logFilePath))
+            if (!string.IsNullOrWhiteSpace(logFilePath) && Path.IsPathRooted(logFilePath))
             {
-                string computerName = Environment.MachineName;
-                File.WriteAllText(logFilePath, JsonConvert.SerializeObject(new { ComputerName = computerName }));
-                EnableEditing(true);
+                try
+                {
+                    if (!File.Exists(logFilePath))
+                    {
+                        string computerName = Environment.MachineName;
+                        File.WriteAllText(logFilePath, JsonConvert.SerializeObject(new { ComputerName = computerName }));
+                        EnableEditing(true);
+                    }
+                    else
+                    {
+                        EnableEditing(false);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Došlo k chybě při zápisu do log souboru: {ex.Message}", "Chyba log souboru",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
             else
             {
-                EnableEditing(false);
+                MessageBox.Show("Cesta pro log soubor není správně nastavena.", "Chybné nastavení cesty",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -640,7 +664,7 @@ namespace BP_rizeni_zakazek
             dataGridViewMaster.EnableHeadersVisualStyles = false;
             dataGridViewMaster.DefaultCellStyle.Font = new System.Drawing.Font("Arial", 10);
             dataGridViewMaster.RowTemplate.Height = 30;
-            dataGridViewMaster.ColumnHeadersHeight = 250;
+            dataGridViewMaster.ColumnHeadersHeight = 50;
 
             dataGridViewMaster.ScrollBars = ScrollBars.Both;
             dataGridViewMaster.GridColor = System.Drawing.Color.DarkGray;
