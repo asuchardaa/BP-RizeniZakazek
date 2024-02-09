@@ -30,13 +30,6 @@ namespace BP_rizeni_zakazek
         public settingsForm()
         {
             InitializeComponent();
-
-            if (Properties.Settings.Default.BackColor == System.Drawing.Color.Empty)
-            {
-                Properties.Settings.Default.BackColor = defaultBackColor;
-                Properties.Settings.Default.Save();
-            }
-
             this.BackColor = Properties.Settings.Default.BackColor;
             UpdatePathsLabel();
             IsPathOrdAndLogChanged = false;
@@ -131,7 +124,6 @@ namespace BP_rizeni_zakazek
             {
                 Properties.Settings.Default.BackColor = colorDialog.Color;
                 this.BackColor = colorDialog.Color;
-                Properties.Settings.Default.Save();
             }
         }
 
