@@ -79,11 +79,12 @@
             panel1.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
             panel1.Location = new Point(0, 0);
             panel1.Name = "panel1";
-            panel1.Size = new Size(186, 892);
+            panel1.Size = new Size(186, 911);
             panel1.TabIndex = 0;
             // 
             // label1
             // 
+            label1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             label1.AutoSize = true;
             label1.Font = new Font("Microsoft Sans Serif", 12F, FontStyle.Bold, GraphicsUnit.Point);
             label1.ForeColor = Color.FromArgb(0, 126, 249);
@@ -95,6 +96,7 @@
             // 
             // OrderDoneOrNotDone
             // 
+            OrderDoneOrNotDone.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             OrderDoneOrNotDone.BackColor = SystemColors.Window;
             OrderDoneOrNotDone.DrawMode = DrawMode.OwnerDrawFixed;
             OrderDoneOrNotDone.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -110,7 +112,8 @@
             // 
             // FilterTextBox
             // 
-            FilterTextBox.Location = new Point(25, 450);
+            FilterTextBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            FilterTextBox.Location = new Point(25, 453);
             FilterTextBox.Name = "FilterTextBox";
             FilterTextBox.PlaceholderText = "Vyhledat zakázku";
             FilterTextBox.Size = new Size(131, 23);
@@ -120,11 +123,12 @@
             // BtnUploadHot
             // 
             BtnUploadHot.Cursor = Cursors.Hand;
+            BtnUploadHot.Dock = DockStyle.Bottom;
             BtnUploadHot.FlatAppearance.BorderSize = 0;
             BtnUploadHot.FlatStyle = FlatStyle.Flat;
             BtnUploadHot.Font = new Font("Microsoft Sans Serif", 12F, FontStyle.Bold, GraphicsUnit.Point);
             BtnUploadHot.ForeColor = SystemColors.Control;
-            BtnUploadHot.Location = new Point(0, 784);
+            BtnUploadHot.Location = new Point(0, 745);
             BtnUploadHot.Name = "BtnUploadHot";
             BtnUploadHot.Size = new Size(186, 62);
             BtnUploadHot.TabIndex = 7;
@@ -135,11 +139,12 @@
             // BtnUpload
             // 
             BtnUpload.Cursor = Cursors.Hand;
+            BtnUpload.Dock = DockStyle.Bottom;
             BtnUpload.FlatAppearance.BorderSize = 0;
             BtnUpload.FlatStyle = FlatStyle.Flat;
             BtnUpload.Font = new Font("Microsoft Sans Serif", 12F, FontStyle.Bold, GraphicsUnit.Point);
             BtnUpload.ForeColor = SystemColors.Control;
-            BtnUpload.Location = new Point(0, 716);
+            BtnUpload.Location = new Point(0, 807);
             BtnUpload.Name = "BtnUpload";
             BtnUpload.Size = new Size(186, 62);
             BtnUpload.TabIndex = 6;
@@ -164,7 +169,7 @@
             BtnSettings.ForeColor = Color.FromArgb(0, 126, 249);
             BtnSettings.Image = (Image)resources.GetObject("BtnSettings.Image");
             BtnSettings.ImageAlign = ContentAlignment.MiddleRight;
-            BtnSettings.Location = new Point(0, 850);
+            BtnSettings.Location = new Point(0, 869);
             BtnSettings.Name = "BtnSettings";
             BtnSettings.Padding = new Padding(10, 0, 0, 0);
             BtnSettings.Size = new Size(186, 42);
@@ -292,7 +297,6 @@
             // 
             // appName
             // 
-            appName.AutoSize = true;
             appName.Font = new Font("Microsoft Sans Serif", 9.75F, FontStyle.Bold, GraphicsUnit.Point);
             appName.ForeColor = Color.FromArgb(0, 126, 249);
             appName.Location = new Point(35, 97);
@@ -314,6 +318,7 @@
             // dataGridViewMaster
             // 
             dataGridViewMaster.AllowUserToAddRows = false;
+            dataGridViewMaster.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             dataGridViewMaster.BackgroundColor = SystemColors.ActiveCaption;
             dataGridViewMaster.BorderStyle = BorderStyle.None;
             dataGridViewMaster.CellBorderStyle = DataGridViewCellBorderStyle.None;
@@ -329,10 +334,10 @@
             dataGridViewMaster.Columns.AddRange(new DataGridViewColumn[] { Customer, NumOfOrder, Date, dateOfFinish, stateOfOrder });
             dataGridViewMaster.EnableHeadersVisualStyles = false;
             dataGridViewMaster.GridColor = SystemColors.ScrollBar;
-            dataGridViewMaster.Location = new Point(224, 20);
+            dataGridViewMaster.Location = new Point(192, 12);
             dataGridViewMaster.Name = "dataGridViewMaster";
             dataGridViewMaster.RowTemplate.Height = 25;
-            dataGridViewMaster.Size = new Size(1657, 985);
+            dataGridViewMaster.Size = new Size(1331, 887);
             dataGridViewMaster.TabIndex = 1;
             // 
             // Customer
@@ -370,21 +375,24 @@
             mainPanel.Dock = DockStyle.Fill;
             mainPanel.Location = new Point(0, 0);
             mainPanel.Name = "mainPanel";
-            mainPanel.Size = new Size(1914, 1041);
+            mainPanel.Size = new Size(1544, 911);
             mainPanel.TabIndex = 2;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            AutoSize = true;
+            AutoValidate = AutoValidate.Disable;
             BackColor = Color.FromArgb(46, 51, 73);
-            ClientSize = new Size(1914, 1041);
+            ClientSize = new Size(1544, 911);
             Controls.Add(panel1);
             Controls.Add(mainPanel);
             Controls.Add(dataGridViewMaster);
             Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            FormBorderStyle = FormBorderStyle.SizableToolWindow;
             Icon = (Icon)resources.GetObject("$this.Icon");
+            MaximumSize = new Size(1560, 950);
+            MinimumSize = new Size(1280, 720);
             Name = "MainForm";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Řízení zakázek - Software dělaný na míru";
@@ -414,9 +422,9 @@
         private Panel NavPnl;
         private Button BtnUpload;
         private Button BtnUploadHot;
-        private ComboBox OrderDoneOrNotDone;
-        private TextBox FilterTextBox;
-        private DataGridView dataGridViewMaster;
+        public ComboBox OrderDoneOrNotDone;
+        public TextBox FilterTextBox;
+        public DataGridView dataGridViewMaster;
         private Label label1;
         private Panel mainPanel;
         private DataGridViewTextBoxColumn Customer;

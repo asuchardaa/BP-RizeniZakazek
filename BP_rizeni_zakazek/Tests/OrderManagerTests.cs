@@ -42,7 +42,7 @@ namespace BP_rizeni_zakazek.Tests
 
         private DataGridViewRow CreateTestRowWithData(List<string[]> detailsList)
         {
-            int rowIndex = _dataGridView.Rows.Add(); // Přidá řádek a vrátí index přidaného řádku
+            int rowIndex = _dataGridView.Rows.Add();
             DataGridViewRow row = _dataGridView.Rows[rowIndex];
             row.Tag = detailsList;
             return row;
@@ -75,7 +75,7 @@ namespace BP_rizeni_zakazek.Tests
             _orderManager.UpdateColorStatusOrders(row, status);
             Color expectedColor = Color.FromName(expectedColorName);
 
-            Assert.That(row.Cells[5].Style.BackColor, Is.EqualTo(expectedColor), $"Cell color should be {expectedColorName} for status '{status}'.");
+            Assert.That(row.Cells[5].Style.BackColor, Is.EqualTo(expectedColor), $"Barva bunky je {expectedColorName} pro doonceny stav'{status}'.");
         }
 
         [Test]
@@ -135,7 +135,7 @@ namespace BP_rizeni_zakazek.Tests
 
             string status = _orderManager.DetermineOrderStatus(numCreated, numOriginalAmount, curve);
 
-            Assert.That(status, Is.EqualTo("Hotovo"), "Status should be 'Hotovo' when numCreated equals numOriginal and curve is 'NE'.");
+            Assert.That(status, Is.EqualTo("Hotovo"), "Stav 'Hotovo' kdyz sedi pocet vyrob. kusu a ohyb je 'NE'.");
         }
 
         [Test]
@@ -143,14 +143,12 @@ namespace BP_rizeni_zakazek.Tests
         {
             string numCreated = "15";
             string numOriginalAmount = "10";
-            string curve = "NE"; // hodnota 'curve' je zde irelevantní
+            string curve = "NE";
 
             string status = _orderManager.DetermineOrderStatus(numCreated, numOriginalAmount, curve);
 
-            Assert.That(status, Is.EqualTo("Více kusů"), "Status should be 'Více kusů' when numCreated is greater than numOriginal.");
+            Assert.That(status, Is.EqualTo("Více kusů"), "Stav 'Více kusů' kdyz vyrobenych ksuu je vic nez by melo.");
         }
-
-        // Další testy ...
 
 
         [Test]
@@ -161,7 +159,7 @@ namespace BP_rizeni_zakazek.Tests
 
             _orderManager.SetOrderCellColor(cell, status);
 
-            Assert.That(cell.Style.BackColor, Is.EqualTo(Color.Red), "Cell color should be red for default case.");
+            Assert.That(cell.Style.BackColor, Is.EqualTo(Color.Red), "Defaultne cervena, ale stejne to je v designeru bily -> pro lepsi prhled, tadyby to aspon pak moho vyhazovat chybu nebo tak neco pri cervenym");
         }
 
         [Test]
@@ -339,7 +337,7 @@ namespace BP_rizeni_zakazek.Tests
         {
             string status = _orderManager.DetermineTheNewStatus(created, amount, curve);
 
-            Assert.That(status, Is.EqualTo(expectedStatus), $"Status should be '{expectedStatus}' for created '{created}', amount '{amount}', and curve '{curve}'.");
+            Assert.That(status, Is.EqualTo(expectedStatus), $"Stav '{expectedStatus}' Vytvoreno '{created}', pocet'{amount}', ohyb '{curve}'.");
         }
 
         [Test]
@@ -351,7 +349,7 @@ namespace BP_rizeni_zakazek.Tests
 
             string status = _orderManager.DetermineTheNewStatus(created, amount, curve);
 
-            Assert.That(status, Is.EqualTo("Rozpracováno"), "Status should be 'Rozpracováno' when curve is 'ANO'.");
+            Assert.That(status, Is.EqualTo("Rozpracováno"), "Stav 'Rozpracováno' s ohybem 'ANO'.");
         }
 
         [Test]
@@ -363,7 +361,7 @@ namespace BP_rizeni_zakazek.Tests
 
             string status = _orderManager.DetermineTheNewStatus(created, amount, curve);
 
-            Assert.That(status, Is.EqualTo("Rozpracováno"), "Status should be 'Rozpracováno' when created amount is less than the original amount.");
+            Assert.That(status, Is.EqualTo("Rozpracováno"), "Stav 'Rozpracováno' kdyz je vyrobeno min kusu nez original kusy.");
         }
 
         [Test]
@@ -375,7 +373,7 @@ namespace BP_rizeni_zakazek.Tests
 
             string status = _orderManager.DetermineTheNewStatus(created, amount, curve);
 
-            Assert.That(status, Is.EqualTo("Více kusů"), "Status should be 'Více kusů' when created amount is more than the original amount.");
+            Assert.That(status, Is.EqualTo("Více kusů"), "Stav 'Více kusů' kdyz je vyrobenych vice kusu nez original.");
         }
     }
 }

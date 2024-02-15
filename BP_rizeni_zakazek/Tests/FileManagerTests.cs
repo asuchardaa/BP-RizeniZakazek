@@ -84,9 +84,9 @@ namespace BP_rizeni_zakazek.Tests
 
             var loadedFiles = _fileManager.GetLoadedFiles();
 
-            Assert.That(loadedFiles, Contains.Item(testFilePath1), "The list should contain the first test file path.");
-            Assert.That(loadedFiles, Contains.Item(testFilePath2), "The list should contain the second test file path.");
-            Assert.That(loadedFiles.Count, Is.EqualTo(2), "The list should contain exactly two files.");
+            Assert.That(loadedFiles, Contains.Item(testFilePath1), "testFilePath.");
+            Assert.That(loadedFiles, Contains.Item(testFilePath2), "DruhyTestFilePath.");
+            Assert.That(loadedFiles.Count, Is.EqualTo(2), "list se dvema fily");
         }
 
         [Test]

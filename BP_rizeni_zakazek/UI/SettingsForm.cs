@@ -49,7 +49,7 @@ namespace BP_rizeni_zakazek
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btnBrowseOrdAndLog_Click(object sender, EventArgs e)
+        public void btnBrowseOrdAndLog_Click(object sender, EventArgs e)
         {
             using (FolderBrowserDialog folderBrowser = new FolderBrowserDialog())
             {

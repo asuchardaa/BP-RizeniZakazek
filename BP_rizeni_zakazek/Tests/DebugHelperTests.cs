@@ -7,8 +7,13 @@ namespace BP_rizeni_zakazek.Tests
     [TestFixture]
     internal class DebugHelperTests
     {
-
         private DebugHelper _debugHelper;
+
+        [SetUp]
+        public void SetUp()
+        {
+            _debugHelper = new DebugHelper();
+        }
 
         [Test]
         public void GetCallingMethodName_ReturnsCorrectMethodName()
@@ -16,7 +21,7 @@ namespace BP_rizeni_zakazek.Tests
             string expectedMethodName = "TestMethod";
             string actualMethodName = TestMethod();
 
-            Assert.That(actualMethodName, Is.EqualTo(expectedMethodName), "The calling method name should match the test method name.");
+            Assert.That(actualMethodName, Is.EqualTo(expectedMethodName), "Metoda by mela sedet s volanym nazvem metody");
         }
 
         private string TestMethod()
@@ -24,4 +29,5 @@ namespace BP_rizeni_zakazek.Tests
             return _debugHelper.GetCallingMethodName();
         }
     }
+
 }

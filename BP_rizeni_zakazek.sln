@@ -5,6 +5,8 @@ VisualStudioVersion = 17.7.34202.233
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BP_rizeni_zakazek", "BP_rizeni_zakazek\BP_rizeni_zakazek.csproj", "{D8F0F3A8-A1CC-4D6C-988D-3A08D6275531}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "RizeniZakazekSetup", "RizeniZakazekSetup\RizeniZakazekSetup.vdproj", "{E8E4713C-1DEA-4AB6-9248-58C3269A6A9B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,8 @@ Global
 		{D8F0F3A8-A1CC-4D6C-988D-3A08D6275531}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D8F0F3A8-A1CC-4D6C-988D-3A08D6275531}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D8F0F3A8-A1CC-4D6C-988D-3A08D6275531}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8E4713C-1DEA-4AB6-9248-58C3269A6A9B}.Debug|Any CPU.ActiveCfg = Debug
+		{E8E4713C-1DEA-4AB6-9248-58C3269A6A9B}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

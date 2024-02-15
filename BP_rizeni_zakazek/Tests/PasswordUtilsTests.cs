@@ -35,11 +35,11 @@ namespace BP_rizeni_zakazek.Tests
         public void ComputeSha256Hash_ReturnsCorrectHash()
         {
             string testData = "testPassword";
-            string expectedHash = "fd5cb51bafd60f6fdbedde6e62c473da6f247db271633e15919bab78a02ee9eb"; // Nahraďte správným hashem
+            string expectedHash = "fd5cb51bafd60f6fdbedde6e62c473da6f247db271633e15919bab78a02ee9eb"; 
 
             string actualHash = _passwordUtils.ComputeSha256Hash(testData);
 
-            Assert.That(actualHash, Is.EqualTo(expectedHash), "The SHA256 hash should match the expected hash.");
+            Assert.That(actualHash, Is.EqualTo(expectedHash), "SHA256 by mel sedet.");
         }
 
         [Test]
@@ -48,7 +48,7 @@ namespace BP_rizeni_zakazek.Tests
         {
             bool result = _passwordUtils.VerifyPassword(password);
 
-            Assert.That(result, Is.EqualTo(expectedResult), "The password verification should match the expected result.");
+            Assert.That(result, Is.EqualTo(expectedResult), "heslo by melo sedet s predepsanym heslem");
         }
 
         [Test]
@@ -56,17 +56,17 @@ namespace BP_rizeni_zakazek.Tests
         {
             _passwordUtils.MoveOrCreateFile(_oldFilePath, _newFilePath);
 
-            Assert.That(File.Exists(_oldFilePath), Is.False, "Old file should not exist after being moved.");
-            Assert.That(File.Exists(_newFilePath), Is.True, "New file should exist after the old file is moved.");
+            Assert.That(File.Exists(_oldFilePath), Is.False, "Starej soubor neexistuje");
+            Assert.That(File.Exists(_newFilePath), Is.True, "Novej soubor existuje a to hnedka po presunuti staryho filu");
         }
 
         [Test]
         public void MoveOrCreateFile_CreatesFile_WhenOldFileDoesNotExist()
         {
-            File.Delete(_oldFilePath); // Ensure old file does not exist
+            File.Delete(_oldFilePath);
             _passwordUtils.MoveOrCreateFile(_oldFilePath, _newFilePath);
 
-            Assert.That(File.Exists(_newFilePath), "New file should be created.");
+            Assert.That(File.Exists(_newFilePath), "Novej soubor vytvorenej");
         }
 
         [Test]
@@ -74,7 +74,7 @@ namespace BP_rizeni_zakazek.Tests
         {
             _passwordUtils.MoveOrCreateFile(_oldFilePath, _newFilePath, true);
 
-            Assert.That(File.Exists(_oldFilePath), Is.False, "Log file should be deleted.");
+            Assert.That(File.Exists(_oldFilePath), Is.False, "Log soubor smazanej");
         }
 
         [Test]
@@ -83,7 +83,6 @@ namespace BP_rizeni_zakazek.Tests
             var messageDisplayerMock = new Mock<IMessageDisplayer>();
             var passwordUtils = new PasswordUtils(messageDisplayerMock.Object);
 
-            // Nastavení podmínek pro vyvolání výjimky
             string invalidOldPath = "neexistující/cesta/oldFile.txt";
             string invalidNewPath = "neexistující/cesta/newFile.txt";
 
@@ -92,10 +91,10 @@ namespace BP_rizeni_zakazek.Tests
             messageDisplayerMock.Verify(m => m.ShowMessage(It.IsAny<string>(), "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error), Times.Once());
         }
 
+        // Skvela metoda, ktera maze soubor hned po testovani -> aspon nebude zadny bordel
         [TearDown]
         public void Teardown()
         {
-            // Clean up test files and directory
             if (File.Exists(_oldFilePath))
             {
                 File.Delete(_oldFilePath);

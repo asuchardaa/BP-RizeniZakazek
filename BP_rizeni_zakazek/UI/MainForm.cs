@@ -8,6 +8,7 @@ using BP_rizeni_zakazek.Helpers;
 using BP_rizeni_zakazek.Managers;
 using BP_rizeni_zakazek.Services;
 using BP_rizeni_zakazek.Interfaces;
+using System.Linq.Expressions;
 
 namespace BP_rizeni_zakazek
 
@@ -33,7 +34,7 @@ namespace BP_rizeni_zakazek
         private PasswordUtils _passwordUtils = new PasswordUtils();
         private readonly DebugHelper _debugHelper = new DebugHelper();
 
-        private Dictionary<int, DataGridView> detailGrids = new Dictionary<int, DataGridView>();
+        public Dictionary<int, DataGridView> detailGrids = new Dictionary<int, DataGridView>();
 
         private Dictionary<string, string> vstupniMaterialy = new Dictionary<string, string>();
         private Dictionary<string, string> vystupniMaterialy = new Dictionary<string, string>();
@@ -66,17 +67,8 @@ namespace BP_rizeni_zakazek
             this.FormClosing += new FormClosingEventHandler(MainForm_FormClosing);
             this.Load += new EventHandler(MainForm_Load);
 
-            //Rectangle screenSize = Screen.PrimaryScreen.WorkingArea;
-            //this.Size = new Size(screenSize.Width, screenSize.Height);
             this.BackColor = Properties.Settings.Default.BackColor;
-            // Nastavení počáteční velikosti formuláře
-            this.Size = new Size(800, 600); // Příklad pevně nastavené velikosti
-
-            // Nastavení vlastností pro responzivitu
-            //mainPanel.Dock = DockStyle.Fill; // mainPanel zabere celý prostor formuláře
-
-            // Příklad nastavení pro DataGridView, aby se rozšiřoval do všech směrů
-            //dataGridViewMaster.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            this.Size = new Size(800, 600);
         }
 
         /// <summary>
@@ -160,7 +152,7 @@ namespace BP_rizeni_zakazek
                 catch (Exception ex)
                 {
                     MessageBox.Show($"Došlo k chybě při zápisu do log souboru: {ex.Message}", "Chyba log souboru",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
             else
@@ -569,7 +561,7 @@ namespace BP_rizeni_zakazek
         /// <summary>
         /// Metoda pro aplikaci filtru na masterGrid (zákazník a číslo zakázky) a detailGrid (název položky)
         /// </summary>
-        private void ApplyFilter()
+        public void ApplyFilter()
         {
             string searchText = FilterTextBox.Text.ToLower();
             string selectedStatus = OrderDoneOrNotDone.SelectedItem.ToString();
@@ -602,7 +594,7 @@ namespace BP_rizeni_zakazek
         /// Metoda pro povolení editu v závislosti na existenci souboru log.json
         /// </summary>
         /// <param name="canEdit"></param>
-        private void EnableEditing(bool canEdit)
+        public void EnableEditing(bool canEdit)
         {
             if (dataGridViewMaster != null)
             {
@@ -750,14 +742,13 @@ namespace BP_rizeni_zakazek
             }
         }
 
-
         /// <summary>
         /// Metoda pro update nebo přidání detailGridu
         /// </summary>
         /// <param name="masterRowIndex"></param>
         /// <param name="fields"></param>
         /// <param name="filteredFields"></param>
-        private void UpdateOrAddDetailGrid(int masterRowIndex, string[] fields, string[] filteredFields)
+        public void UpdateOrAddDetailGrid(int masterRowIndex, string[] fields, string[] filteredFields)
         {
             List<string[]> detailsList = (List<string[]>)dataGridViewMaster.Rows[masterRowIndex].Tag;
 
@@ -796,7 +787,6 @@ namespace BP_rizeni_zakazek
                 _dataGridHelper.UpdateDetailGrid(detailGrid, detailsList);
             }
         }
-
 
         /// <summary>
         /// Metoda pro rozbalení DetailGridu
@@ -859,7 +849,6 @@ namespace BP_rizeni_zakazek
             }
         }
 
-
         /// <summary>
         /// Metoda pro vytvoření a zobrazení detailGridu spojeným na masterGrid
         /// </summary>
@@ -867,7 +856,7 @@ namespace BP_rizeni_zakazek
         /// <param name="detailsList"></param>
         /// <param name="visible"></param>
         /// <returns></returns>
-        private DataGridView CreateAndShowDetailDataGridView(int rowIndex, List<string[]> detailsList, bool visible)
+        public DataGridView CreateAndShowDetailDataGridView(int rowIndex, List<string[]> detailsList, bool visible)
         {
             DataGridView detailDataGridView;
 
@@ -878,6 +867,7 @@ namespace BP_rizeni_zakazek
                     AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
                     AllowUserToAddRows = false,
                     ReadOnly = false,
+                    Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right,
                     AllowUserToResizeRows = false,
                     AllowUserToResizeColumns = false,
                     BackgroundColor = System.Drawing.Color.FromArgb(153, 180, 209),
@@ -994,10 +984,11 @@ namespace BP_rizeni_zakazek
                                         detailDataGridView.ColumnHeadersHeight;
 
             int currentY = dataGridViewMaster.Location.Y + dataGridViewMaster.ColumnHeadersHeight;
-            for (int i = 0; i <= rowIndex; i++)
+            for (int i = 0; i < Math.Min(rowIndex + 1, dataGridViewMaster.Rows.Count); i++)
             {
                 currentY += dataGridViewMaster.Rows[i].Height;
             }
+
 
             detailDataGridView.Location = new Point(dataGridViewMaster.Location.X, currentY);
             detailGrids[rowIndex] = detailDataGridView;
@@ -1006,14 +997,33 @@ namespace BP_rizeni_zakazek
 
             detailDataGridView.BringToFront();
 
-            if (visible)
+            if (dataGridViewMaster.Rows.Count > 0)
             {
-                dataGridViewMaster.Rows[rowIndex].Cells["ExpandDetails"].Value = "-";
+                if (rowIndex >= 0 && rowIndex < dataGridViewMaster.Rows.Count)
+                {
+                    if (visible)
+                    {
+                        dataGridViewMaster.Rows[rowIndex].Cells["ExpandDetails"].Value = "-";
+                    }
+                    else
+                    {
+                        dataGridViewMaster.Rows[rowIndex].Cells["ExpandDetails"].Value = "+";
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"mimo index {rowIndex}.");
+                    foreach (DataGridViewRow row in dataGridViewMaster.Rows)
+                    {
+                        row.Cells["ExpandDetails"].Value = "N/A";
+                    }
+                }
             }
             else
             {
-                dataGridViewMaster.Rows[rowIndex].Cells["ExpandDetails"].Value = "+";
+                Console.WriteLine("dataGridViewMaster nic neobsahuje.");
             }
+
 
             Debug.WriteLine(_debugHelper.GetCallingMethodName());
 
@@ -1137,7 +1147,7 @@ namespace BP_rizeni_zakazek
         /// </summary>
         /// <param name="detail"></param>
         /// <param name="vyrobeno"></param>
-        private void UpdateDetailIfNecessary(string[] detail, string vyrobeno)
+        public void UpdateDetailIfNecessary(string[] detail, string vyrobeno)
         {
             if (int.TryParse(vyrobeno, out int newCreated) && newCreated > 0)
             {
@@ -1255,7 +1265,6 @@ namespace BP_rizeni_zakazek
             }
         }
 
-
         /// <summary>
         /// Metoda pro uložení dat do JSON souboru
         /// </summary>
@@ -1317,7 +1326,7 @@ namespace BP_rizeni_zakazek
         /// Metoda pro načtení dat z JSON souboru
         /// </summary>
         /// <param name="filePath"></param>
-        private void LoadDataFromJson(string filePath)
+        public void LoadDataFromJson(string filePath)
         {
             if (!File.Exists(filePath))
             {

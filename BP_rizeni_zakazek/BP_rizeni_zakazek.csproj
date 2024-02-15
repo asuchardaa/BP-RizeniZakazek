@@ -8,12 +8,17 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <StartupObject>BP_rizeni_zakazek.Program</StartupObject>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <ApplicationIcon>app-icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Remove="Utils\**" />
     <EmbeddedResource Remove="Utils\**" />
     <None Remove="Utils\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="app-icon.ico" />
   </ItemGroup>
 
   <ItemGroup>

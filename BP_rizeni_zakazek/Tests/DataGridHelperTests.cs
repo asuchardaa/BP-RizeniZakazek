@@ -46,7 +46,7 @@ namespace BP_rizeni_zakazek.Tests
                 .Cast<DataGridViewRow>()
                 .Any(row => !row.IsNewRow && row.Cells["NumOfOrder"].Value.ToString() == orderNumber);
 
-            Assert.That(rowExists, Is.False, "The row with specified order number should have been removed.");
+            Assert.That(rowExists, Is.False, "Radek s timto cislem zakazky by mel byt odstranen.");
         }
 
         [Test]
@@ -66,7 +66,7 @@ namespace BP_rizeni_zakazek.Tests
             {
                 if (!row.IsNewRow)
                 {
-                    Assert.That(row.Cells["stateOfOrder"].Value.ToString(), Is.EqualTo("Neznámý"), "The status of the order should be updated to 'ExpectedStatus'.");
+                    Assert.That(row.Cells["stateOfOrder"].Value.ToString(), Is.EqualTo("Neznámý"), "Status by se mel zmenit na dany ExpectedStatus.");
                 }
             }
         }
@@ -77,7 +77,7 @@ namespace BP_rizeni_zakazek.Tests
             string[] fields = new string[] { "Customer1", "123", "", "", "", "", "", "", "01/01/2023" };
             int rowIndex = _dataGridHelper.FindOrAddMasterRow(_dataGridView, fields);
 
-            Assert.That(rowIndex, Is.EqualTo(0), "Should find the existing row at index 0.");
+            Assert.That(rowIndex, Is.EqualTo(0), "Melo by to najit rade na indexu 0.");
         }
 
         [Test]
@@ -87,7 +87,7 @@ namespace BP_rizeni_zakazek.Tests
             int expectedIndex = _dataGridView.Rows.Count;
             int rowIndex = _dataGridHelper.FindOrAddMasterRow(_dataGridView, fields);
 
-            Assert.That(rowIndex, Is.EqualTo(expectedIndex - 1), "Should add a new row at the last index.");
+            Assert.That(rowIndex, Is.EqualTo(expectedIndex - 1), "Melo by pridat novej radek na konec (posledni index).");
         }
 
         [Test]
@@ -96,9 +96,9 @@ namespace BP_rizeni_zakazek.Tests
             string[] fields = new string[] { "Customer3", "789", "", "", "", "", "", "", "01/03/2023" };
             int rowIndex = _dataGridHelper.FindOrAddMasterRow(_dataGridView, fields);
 
-            Assert.That(_dataGridView.Rows[rowIndex].Cells["Customer"].Value?.ToString(), Is.EqualTo(fields[0].Trim()), "The 'Customer' field should match.");
-            Assert.That(_dataGridView.Rows[rowIndex].Cells["NumOfOrder"].Value?.ToString(), Is.EqualTo(fields[1].Trim()), "The 'NumOfOrder' field should match.");
-            Assert.That(_dataGridView.Rows[rowIndex].Cells["Date"].Value?.ToString(), Is.EqualTo(fields[8].Trim()), "The 'Date' field should match.");
+            Assert.That(_dataGridView.Rows[rowIndex].Cells["Customer"].Value?.ToString(), Is.EqualTo(fields[0].Trim()), "CustomerCol");
+            Assert.That(_dataGridView.Rows[rowIndex].Cells["NumOfOrder"].Value?.ToString(), Is.EqualTo(fields[1].Trim()), "NumOfOrderCol");
+            Assert.That(_dataGridView.Rows[rowIndex].Cells["Date"].Value?.ToString(), Is.EqualTo(fields[8].Trim()), "DateCol");
         }
 
         [Test]
@@ -109,7 +109,7 @@ namespace BP_rizeni_zakazek.Tests
 
             _dataGridHelper.UpdateDetailGrid(_detailGrid, detailsList);
 
-            Assert.That(_detailGrid.Rows.Count, Is.EqualTo(2), "Detail grid should only contain rows added by the method.");
+            Assert.That(_detailGrid.Rows.Count, Is.EqualTo(2), "DetailGrid radky jen podle tyhle metody");
         }
 
         [Test]
@@ -122,7 +122,7 @@ namespace BP_rizeni_zakazek.Tests
 
             _dataGridHelper.UpdateDetailGrid(_detailGrid, detailsList);
 
-            Assert.That(_detailGrid.Rows.Count, Is.EqualTo(3), "Detail grid should contain the same number of rows as the details list.");
+            Assert.That(_detailGrid.Rows.Count, Is.EqualTo(3), "DetailGrid");
         }
 
         [Test]
@@ -136,7 +136,7 @@ namespace BP_rizeni_zakazek.Tests
 
             for (int i = 0; i < _detailGrid.Columns.Count; i++)
             {
-                Assert.That(_detailGrid.Rows[0].Cells[i].Value?.ToString(), Is.EqualTo(detailsList[0][i + 2]), $"Data in column {i} should match the details list.");
+                Assert.That(_detailGrid.Rows[0].Cells[i].Value?.ToString(), Is.EqualTo(detailsList[0][i + 2]), $"Data ve sloupci {i} bxy mely sedet s listem");
             }
         }
     }
