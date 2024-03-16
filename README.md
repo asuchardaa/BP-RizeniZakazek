@@ -6,19 +6,18 @@ Vítejte v mém projektu! Tento README Vám poskytne přehled o projektu, včetn
 
 1. [Popis Projektu](#popis-projektu)
 2. [Instalace](#instalace)
-3. [Spouštění](#spouštění)
+3. [Spuštění](#spuštění)
 4. [Testování](#testování)
 5. [Testovací Data](#testovací-data)
 6. [Příspěvky a Zpětná Vazba](#příspěvky-a-zpětná-vazba)
-7. [Autoři](#autoři)
-8. [Obrázky](#obrázky)
+7. [Autor a kontakt](#autor-a-kontakt)
 
 ## Popis projektu
 
 Tento projekt vytváří desktopovou aplikaci, která řeší vyhodnocování (stav dokončení) zakázek dle dokončení jednotlivých položek zakázky.
 Aplikace tak uživatelům umožňuje spravovat nahrané zakázky, editovat či smazat data a celkově tak poskytuje ucelený přehled stavu jednotlivých zakázek, jež jsou v podinku aktuální.
 Poslední implementace zajišťuje i možnost generování statistik, které uživatelé mohou využít pro další analýzu a vyhodnocování aktuálních zakázek.
-Byl využit jazykC# s využitím platformy .NET Framework a knihovny Windows Forms pro vytvoření uživatelského rozhraní.
+Byl využit jazyk C# s využitím platformy .NET Framework a knihovny Windows Forms pro vytvoření uživatelského rozhraní.
 Výsledná aplikace je určena pro konkrétní podnik, pro něj je vytvořena a přizpůsobena. 
 
 ### Klíčové funkce
@@ -39,12 +38,12 @@ Výsledná aplikace je určena pro konkrétní podnik, pro něj je vytvořena a 
 
 ## Instalace
 
-Pro spuštění projektu stačí stáhnout instalační balíček ve formátu ZIP a rozbalit jej na svém počítači. Aplikaci pak stačí naintsalovat spolu s potřebnými balíčky pro spuštění aplikace (měl by zajišťovat instalační balíček - viz dokumentace).
-Po úspěšné instalaci lze aplikaci spustit skrze vytvořeného zástupce na ploše či Vaše prostředí.
+Pro spuštění projektu stačí stáhnout instalační balíček ve formátu ZIP (adresář Versions) a rozbalit jej na svém počítači. Aplikaci pak stačí naintsalovat spolu s potřebnými balíčky pro spuštění aplikace (měl by zajišťovat instalační balíček - viz dokumentace).
+Po úspěšné instalaci lze aplikaci spustit skrze vytvořeného zástupce na ploše či Vaše systémové prostředí.
 
-## Spouštění
+## Spuštění
 
-Projekt lze spustit buď z vývojového prostředí nebo sestavením a spuštěním výsledného .exe souboru. Při spuštění aplikace se zobrazí hlavní okno, kde uživatelé nejdříve musí nastavit potřebné cesty pro zajištění správně funkcionaity aplikace. Pro uložení změn v nastavení je třeba znát heslo. 
+Projekt lze spustit buď z vývojového prostředí nebo sestavením a spuštěním výsledného .exe souboru. Při spuštění aplikace se zobrazí hlavní okno, kde uživatelé nejdříve musí nastavit potřebné cesty pro zajištění správně funkcionality aplikace. Pro uložení změn v nastavení je třeba znát heslo. 
 Pro tento účel je třeba kontaktovat vývojáře na jeho email. Pro zajištění správného prvotního nastavení a komplexního používání celé aplikace je nejdříve doporučeno řádně nastudovat dokumentaci a dodržovat přesný postup.
 Dokumentaci lze nalézt v balíčku Docs.
 
@@ -63,5 +62,6 @@ Pokud máte nějaké nápady na vylepšení aplikace nebo narazíte na chyby, bu
 
 ## Autor a Kontakt
 
-Tento projekt byl vytvořen v rámci bakalářské práce, jehož autorem je Adam Sucharda.
-Email: asucharda@seznam.cz
+- Autor: Adam Sucharda
+- Email: asucharda@seznam.cz
+- Rok vývoje: 2024
