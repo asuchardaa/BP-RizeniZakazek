@@ -60,7 +60,7 @@ Nejdříve je nutné nahrát všechny vstupní soubory a až poté všechny výs
 
 Pokud máte nějaké nápady na vylepšení aplikace nebo narazíte na chyby, budu rád za vaše příspěvky a zpětnou vazbu. Pro příspěvky můžete použít vytvoření příspěvku v kategorii Issues v mém repozitáři.
 
-## Autor a Kontakt
+## Autor a kontakt
 
 - Autor: Adam Sucharda
 - Email: asucharda@seznam.cz
