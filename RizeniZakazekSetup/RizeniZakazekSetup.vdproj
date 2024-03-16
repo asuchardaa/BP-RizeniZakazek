@@ -67,11 +67,6 @@
                     "Name" = "8:Modul runtime .NET 6.0.23 (x86)"
                     "ProductCode" = "8:Microsoft.NetCore.CoreRuntime.6.0.x86"
                     }
-                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.NetCore.DesktopRuntime.6.0.Arm64"
-                    {
-                    "Name" = "8:Modul runtime .NET Desktop 6.0.23 (Arm64)"
-                    "ProductCode" = "8:Microsoft.NetCore.DesktopRuntime.6.0.Arm64"
-                    }
                     "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.NetCore.DesktopRuntime.6.0.x64"
                     {
                     "Name" = "8:Modul runtime .NET Desktop 6.0.23 (x64)"
@@ -107,6 +102,14 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.7.2"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.7.2 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.7.2"
+                    }
+                }
             }
         }
     }
@@ -216,7 +219,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:RizeniZakazekSetup"
         "ProductCode" = "8:{E37FD6CE-2059-4A14-AA93-CED1D2A3BD6A}"
-        "PackageCode" = "8:{33B3F008-96E2-4472-92D1-06B3BB76F31C}"
+        "PackageCode" = "8:{9DC8DD2D-44E9-4DDB-BFC5-F800E86BD7F7}"
         "UpgradeCode" = "8:{D90424B6-FB6E-4C66-8972-352A2D77C9A9}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"

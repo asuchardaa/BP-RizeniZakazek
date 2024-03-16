@@ -7,6 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BP_rizeni_zakazek", "BP_riz
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "RizeniZakazekSetup", "RizeniZakazekSetup\RizeniZakazekSetup.vdproj", "{E8E4713C-1DEA-4AB6-9248-58C3269A6A9B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Položky řešení", "Položky řešení", "{18AB98E4-AEAA-4D9C-94CC-2CCFA65CA572}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

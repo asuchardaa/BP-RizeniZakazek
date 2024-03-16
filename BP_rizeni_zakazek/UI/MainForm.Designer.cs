@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
             panel1 = new Panel();
@@ -45,7 +46,7 @@
             panel2 = new Panel();
             PnlNav = new Panel();
             OrganizationName = new Label();
-            appName = new Label();
+            userPermissionLabel = new Label();
             pictureBox1 = new PictureBox();
             dataGridViewMaster = new DataGridView();
             Customer = new DataGridViewTextBoxColumn();
@@ -268,7 +269,7 @@
             // 
             panel2.Controls.Add(PnlNav);
             panel2.Controls.Add(OrganizationName);
-            panel2.Controls.Add(appName);
+            panel2.Controls.Add(userPermissionLabel);
             panel2.Controls.Add(pictureBox1);
             panel2.Dock = DockStyle.Top;
             panel2.Location = new Point(0, 0);
@@ -295,15 +296,16 @@
             OrganizationName.TabIndex = 2;
             OrganizationName.Text = "Jméno organizace";
             // 
-            // appName
+            // userPermissionLabel
             // 
-            appName.Font = new Font("Microsoft Sans Serif", 9.75F, FontStyle.Bold, GraphicsUnit.Point);
-            appName.ForeColor = Color.FromArgb(0, 126, 249);
-            appName.Location = new Point(35, 97);
-            appName.Name = "appName";
-            appName.Size = new Size(111, 16);
-            appName.TabIndex = 1;
-            appName.Text = "Řízení zakázek";
+            userPermissionLabel.Font = new Font("Microsoft Sans Serif", 9.75F, FontStyle.Bold, GraphicsUnit.Point);
+            userPermissionLabel.ForeColor = Color.FromArgb(0, 126, 249);
+            userPermissionLabel.Location = new Point(35, 97);
+            userPermissionLabel.Name = "userPermissionLabel";
+            userPermissionLabel.Size = new Size(111, 16);
+            userPermissionLabel.TabIndex = 1;
+            userPermissionLabel.Text = "Řízení zakázek";
+            userPermissionLabel.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // pictureBox1
             // 
@@ -411,7 +413,7 @@
         private Panel panel1;
         private Panel panel2;
         private PictureBox pictureBox1;
-        private Label appName;
+        private Label userPermissionLabel;
         private Button BtnDashboard;
         private Label OrganizationName;
         private Button BtnSettings;

@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
     <TargetFramework>net6.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
@@ -9,6 +8,7 @@
     <StartupObject>BP_rizeni_zakazek.Program</StartupObject>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <ApplicationIcon>app-icon.ico</ApplicationIcon>
+    <OutputType>WinExe</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,6 +27,7 @@
     <PackageReference Include="Moq" Version="4.20.70" />
     <PackageReference Include="NUnit" Version="4.0.1" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
+    <PackageReference Include="WinForms.DataVisualization" Version="1.9.2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -57,7 +58,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Data\Výstup\" />
+    <Folder Include="Data\Vstup\" />
     <Folder Include="Enums\" />
+    <Folder Include="Versions\" />
   </ItemGroup>
 
 </Project>

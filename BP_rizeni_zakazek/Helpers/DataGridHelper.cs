@@ -92,5 +92,35 @@ namespace BP_rizeni_zakazek.Helpers
                 detailGrid.Rows.Add(detail.Skip(2).Take(detailGrid.Columns.Count).ToArray());
             }
         }
+
+        /// <summary>
+        /// Metoda pro ověření validnosti detailních údajů (zápornost, čísla, písmena)
+        /// </summary>
+        /// <param name="vyrobeno"></param>
+        /// <param name="pocet"></param>
+        /// <param name="ohyb"></param>
+        /// <returns></returns>
+        public bool AreDetailsValid(string vyrobeno, string pocet, string ohyb)
+        {
+            if (string.IsNullOrWhiteSpace(vyrobeno) || string.IsNullOrWhiteSpace(pocet) || string.IsNullOrWhiteSpace(ohyb))
+            {
+                MessageBox.Show("Všechna pole ve detailní tabulce musí být vyplněna.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+
+            if (!int.TryParse(vyrobeno, out int vyrobenoValue) || !int.TryParse(pocet, out int pocetValue) || vyrobenoValue < 0 || pocetValue < 0)
+            {
+                MessageBox.Show("Vyrobeno a Počet musí být kladná celá čísla.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+
+            if (!ohyb.Equals("ano", StringComparison.OrdinalIgnoreCase) && !ohyb.Equals("ne", StringComparison.OrdinalIgnoreCase))
+            {
+                MessageBox.Show("Ohyb musí být buď 'ano' nebo 'ne'.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+
+            return true;
+        }
     }
 }

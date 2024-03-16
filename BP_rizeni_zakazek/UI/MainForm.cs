@@ -9,6 +9,7 @@ using BP_rizeni_zakazek.Managers;
 using BP_rizeni_zakazek.Services;
 using BP_rizeni_zakazek.Interfaces;
 using System.Linq.Expressions;
+using BP_rizeni_zakazek.UI;
 
 namespace BP_rizeni_zakazek
 
@@ -63,7 +64,6 @@ namespace BP_rizeni_zakazek
                 new DataGridViewCellEventHandler(dataGridViewMaster_CellContentClick);
             InitializeDataGridViewMaster();
             dataGridViewMaster.CellEndEdit += new DataGridViewCellEventHandler(detailGrid_CellEndEdit);
-
             this.FormClosing += new FormClosingEventHandler(MainForm_FormClosing);
             this.Load += new EventHandler(MainForm_Load);
 
@@ -141,7 +141,8 @@ namespace BP_rizeni_zakazek
                     if (!File.Exists(logFilePath))
                     {
                         string computerName = Environment.MachineName;
-                        File.WriteAllText(logFilePath, JsonConvert.SerializeObject(new { ComputerName = computerName }));
+                        File.WriteAllText(logFilePath,
+                            JsonConvert.SerializeObject(new { ComputerName = computerName }));
                         EnableEditing(true);
                     }
                     else
@@ -187,8 +188,6 @@ namespace BP_rizeni_zakazek
             OrderDoneOrNotDone.Items.Add("Rozpracováno");
             OrderDoneOrNotDone.SelectedIndex = 0;
             OrderDoneOrNotDone.DrawItem += OrderDoneOrNotDone_DrawItem;
-
-
             ShowDashboard();
         }
 
@@ -241,20 +240,13 @@ namespace BP_rizeni_zakazek
         /// <param name="e"></param>
         private void BtnStatistics_Click(object sender, EventArgs e)
         {
-            try
-            {
-                ResetButtonColors();
-                NavPnl.Height = BtnStatistics.Height;
-                NavPnl.Top = BtnStatistics.Top;
-                NavPnl.Left = BtnStatistics.Left;
-                BtnStatistics.BackColor = System.Drawing.Color.FromArgb(46, 51, 73);
-                throw new NotImplementedException();
-            }
-            catch (NotImplementedException)
-            {
-                MessageBox.Show("Tato funkce ještě není dostupná. 😢", "Není implementováno", MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
-            }
+            ResetButtonColors();
+            NavPnl.Height = BtnStatistics.Height;
+            NavPnl.Top = BtnStatistics.Top;
+            NavPnl.Left = BtnStatistics.Left;
+            BtnStatistics.BackColor = System.Drawing.Color.FromArgb(46, 51, 73);
+            var statistics = new StatisticsForm();
+            loadForm(statistics);
         }
 
         /// <summary>
@@ -287,20 +279,13 @@ namespace BP_rizeni_zakazek
         /// <param name="e"></param>
         private void BtnArchive_Click(object sender, EventArgs e)
         {
-            try
-            {
                 ResetButtonColors();
                 NavPnl.Height = BtnArchive.Height;
                 NavPnl.Top = BtnArchive.Top;
                 NavPnl.Left = BtnArchive.Left;
                 BtnArchive.BackColor = System.Drawing.Color.FromArgb(46, 51, 73);
-                throw new NotImplementedException();
-            }
-            catch (NotImplementedException)
-            {
-                MessageBox.Show("Tato funkce ještě není dostupná. 😢", "Není implementováno", MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
-            }
+                var archive = new ArchiveForm();
+                loadForm(archive);
         }
 
         /// <summary>
@@ -608,6 +593,8 @@ namespace BP_rizeni_zakazek
 
             BtnUpload.Enabled = canEdit;
             BtnUploadHot.Enabled = canEdit;
+
+            userPermissionLabel.Text = canEdit ? "Admin" : "Běžný uživatel";
         }
 
         /// <summary>
@@ -910,6 +897,7 @@ namespace BP_rizeni_zakazek
                 detailDataGridView.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
                 detailDataGridView.Tag = rowIndex;
                 detailDataGridView.CellEndEdit += new DataGridViewCellEventHandler(detailGrid_CellEndEdit);
+                detailDataGridView.CellValidating += (sender, e) => detailGrid_CellValidating(sender, e);
 
                 detailDataGridView.Width = dataGridViewMaster.Width;
 
@@ -932,11 +920,9 @@ namespace BP_rizeni_zakazek
                 detailDataGridView.CellClick += new DataGridViewCellEventHandler(DetailGrid_CellClick);
 
                 this.Controls.Add(detailDataGridView);
-
+                detailDataGridView.EndEdit();
                 detailGrids[rowIndex] = detailDataGridView;
             }
-
-            detailDataGridView.Rows.Clear();
 
             foreach (var detail in detailsList)
             {
@@ -1201,6 +1187,26 @@ namespace BP_rizeni_zakazek
         }
 
         /// <summary>
+        /// Metoda pro validaci dat v detailGridu
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void detailGrid_CellValidating(object sender, DataGridViewCellValidatingEventArgs e)
+        {
+            var detailGrid = sender as DataGridView;
+            int masterRowIndex = Convert.ToInt32(detailGrid.Tag);
+
+            var vyrobeno = detailGrid.Rows[e.RowIndex].Cells[6].Value?.ToString();
+            var pocet = detailGrid.Rows[e.RowIndex].Cells[3].Value?.ToString();
+            var ohyb = detailGrid.Rows[e.RowIndex].Cells[4].Value?.ToString();
+
+            if (!_dataGridHelper.AreDetailsValid(vyrobeno, pocet, ohyb))
+            {
+                e.Cancel = true;
+            }
+        }
+
+        /// <summary>
         /// Metoda pro uložení upravení a uložení dat v detailGridu
         /// </summary>
         /// <param name="sender"></param>
@@ -1226,6 +1232,12 @@ namespace BP_rizeni_zakazek
                 var pocet = detailRow.Cells[3].Value?.ToString();
                 var ohyb = detailRow.Cells[4].Value?.ToString();
                 Debug.WriteLine($"Aktuální data: Vyrobeno = {vyrobeno}, Počet = {pocet}, Ohyb = {ohyb}");
+
+                if (!_dataGridHelper.AreDetailsValid(vyrobeno, pocet, ohyb))
+                {
+                    detailGrid.CancelEdit();
+                    return;
+                }
 
 
                 string novyStav = _orderManager.DetermineTheNewStatus(vyrobeno, pocet, ohyb);
