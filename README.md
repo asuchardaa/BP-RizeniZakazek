@@ -4,13 +4,15 @@ Vítejte v mém projektu! Tento README Vám poskytne přehled o projektu, včetn
 
 ## Obsah
 
-1. [Popis Projektu](#popis-projektu)
+1. [Popis projektu](#popis-projektu)
 2. [Instalace](#instalace)
-3. [Spuštění](#spuštění)
+3. [Spouštění](#spouštění)
 4. [Testování](#testování)
-5. [Testovací Data](#testovací-data)
-6. [Příspěvky a Zpětná Vazba](#příspěvky-a-zpětná-vazba)
-7. [Autor a kontakt](#autor-a-kontakt)
+5. [Testovací data](#testovací-data)
+6. [Manuál a dokumentace](#manuál-a-dokumentace)
+7. [Příspěvky a zpětná vazba](#příspěvky-a-zpětná-vazba)
+8. [Autoři](#autoři)
+9. [Obrázky](#obrázky)
 
 ## Popis projektu
 
@@ -55,6 +57,10 @@ Pro testování aplikace je nutné mít nainstalované testovací prostředí pr
 
 Pro účely testování jsou k dispozici originální testovací data od organizace, která jsou nutná použít k ověření funkcionality aplikace. Testovací data jsou k dispozici ve formě souborů s příponou .CSV a lze je nalézt v adresáři Data. 
 Nejdříve je nutné nahrát všechny vstupní soubory a až poté všechny výstupní soubory.
+
+## Manuál a dokumentace
+
+Pro správné používání aplikace je nutné se řídit manuálem, který je k dispozici ve složce Manual. Manuál obsahuje kompletní popis všech funkcí aplikace, včetně postupů pro správné nastavení a používání aplikace.
 
 ## Příspěvky a zpětná vazba
 
