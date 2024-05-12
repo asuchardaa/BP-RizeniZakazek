@@ -9,7 +9,7 @@ Vítejte v mém bakalářském projektu! Tento README Vám poskytne přehled o p
 3. [Spouštění](#spouštění)
 4. [Testování](#testování)
 5. [Testovací data](#testovací-data)
-6. [Manuál a dokumentace](#manual-a-dokumentace)
+6. [Manuál a dokumentace](#manuál-a-dokumentace)
 7. [Příspěvky a zpětná vazba](#příspěvky-a-zpětná-vazba)
 8. [Autoři](#autoři)
 9. [Obrázky](#obrázky)
@@ -61,6 +61,7 @@ Nejdříve je nutné nahrát všechny vstupní soubory a až poté všechny výs
 ## Manuál a dokumentace
 
 Pro správné používání aplikace je nutné se řídit manuálem, který je k dispozici ve složce Manual. Manuál obsahuje kompletní popis všech funkcí aplikace, včetně postupů pro správné nastavení a používání aplikace.
+
 ## Příspěvky a zpětná vazba
 
 Pokud máte nějaké nápady na vylepšení aplikace nebo narazíte na chyby, budu rád za vaše příspěvky a zpětnou vazbu. Pro příspěvky můžete použít vytvoření příspěvku v kategorii Issues v mém repozitáři.
