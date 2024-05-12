@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
   <Class Name="BP_rizeni_zakazek.Helpers.DataGridHelper" Collapsed="true">
-    <Position X="3" Y="0.5" Width="1.5" />
+    <Position X="2.75" Y="0.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AEAEAABAAAAAAAAAQCAAAAAAAAAAAAAAAAAAAAAAgAA=</HashCode>
       <FileName>Helpers\DataGridHelper.cs</FileName>
@@ -11,28 +11,28 @@
     </ShowAsAssociation>
   </Class>
   <Class Name="BP_rizeni_zakazek.Helpers.DebugHelper" Collapsed="true">
-    <Position X="9" Y="2.25" Width="1.5" />
+    <Position X="5.75" Y="2.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Helpers\DebugHelper.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="BP_rizeni_zakazek.Managers.BaseManager" Collapsed="true">
-    <Position X="9" Y="0.5" Width="1.5" />
+    <Position X="7.75" Y="0.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAUAAAAAAAAAgAEAAQAAAAAAEAABCAAAgAAAAAAAAAA=</HashCode>
       <FileName>Managers\BaseManager.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="BP_rizeni_zakazek.Managers.OrderManager" Collapsed="true">
-    <Position X="6.75" Y="0.5" Width="1.5" />
+    <Position X="5.75" Y="0.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAUAAAAAAAAAgAEAAQAAAAAAEAABCAAAgAAAAAAAAAA=</HashCode>
       <FileName>Managers\OrderManager.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="BP_rizeni_zakazek.Services.FileManager" Collapsed="true" BaseTypeListCollapsed="true">
-    <Position X="11.5" Y="0.5" Width="1.5" />
+    <Position X="7.75" Y="1.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAABgAAAIAAAAAAAAAAAACACAAAAAAAAAAAgAAAAA=</HashCode>
       <FileName>Services\FileManager.cs</FileName>
@@ -40,7 +40,7 @@
     <Lollipop Position="0.1" />
   </Class>
   <Class Name="BP_rizeni_zakazek.Services.MessageBoxDisplayer" Collapsed="true" BaseTypeListCollapsed="true">
-    <Position X="11.5" Y="1.75" Width="1.5" />
+    <Position X="7.75" Y="2.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Services\MessageBoxDisplayer.cs</FileName>
@@ -48,7 +48,7 @@
     <Lollipop Position="0.101" />
   </Class>
   <Class Name="BP_rizeni_zakazek.Services.PasswordUtils" Collapsed="true">
-    <Position X="7" Y="4" Width="1.5" />
+    <Position X="5.75" Y="3.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>ACAAEAQAAAAAAAAAACACAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Services\PasswordUtils.cs</FileName>
@@ -62,11 +62,11 @@
     <AssociationLine Name="_passwordUtils" Type="BP_rizeni_zakazek.Services.PasswordUtils" ManuallyRouted="true">
       <Path>
         <Point X="2" Y="3.075" />
-        <Point X="3.385" Y="3.075" Type="JumpStart" />
-        <Point X="3.552" Y="3.075" Type="JumpEnd" />
+        <Point X="3.135" Y="3.075" Type="JumpStart" />
+        <Point X="3.302" Y="3.075" Type="JumpEnd" />
         <Point X="4.375" Y="3.075" />
-        <Point X="4.375" Y="4.281" />
-        <Point X="7" Y="4.281" />
+        <Point X="4.375" Y="4.031" />
+        <Point X="5.75" Y="4.031" />
       </Path>
     </AssociationLine>
     <TypeIdentifier>
@@ -104,7 +104,7 @@
     </TypeIdentifier>
   </Class>
   <Interface Name="BP_rizeni_zakazek.Interfaces.IDataManager" Collapsed="true">
-    <Position X="4" Y="1.5" Width="1.5" />
+    <Position X="3.75" Y="1.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAABgAAAIAAAAAAAAAAAAAACAAAAAAAAAAAgAAAAA=</HashCode>
       <FileName>Interfaces\IDataManager.cs</FileName>

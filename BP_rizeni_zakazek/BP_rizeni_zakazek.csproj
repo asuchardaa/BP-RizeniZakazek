@@ -61,6 +61,7 @@
     <Folder Include="Data\Výstup\" />
     <Folder Include="Data\Vstup\" />
     <Folder Include="Enums\" />
+    <Folder Include="NováSložka\" />
     <Folder Include="Versions\" />
   </ItemGroup>
 
