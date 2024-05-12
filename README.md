@@ -40,8 +40,8 @@ Výsledná aplikace je určena pro konkrétní podnik, pro něj je vytvořena a 
 
 ## Instalace
 
-Pro spuštění projektu stačí stáhnout instalační balíček ve formátu ZIP (adresář Versions) a rozbalit jej na svém počítači. Aplikaci pak stačí naintsalovat spolu s potřebnými balíčky pro spuštění aplikace (měl by zajišťovat instalační balíček - viz dokumentace).
-Po úspěšné instalaci lze aplikaci spustit skrze vytvořeného zástupce na ploše či Vaše systémové prostředí.
+Pro spuštění projektu stačí stáhnout instalační balíček ve složce Versions nebo v Releases (formát ZIP) a rozbalit jej na svém počítači. Aplikaci pak stačí naintsalovat spolu s potřebnými balíčky pro spuštění aplikace (měl by zajišťovat instalační balíček - viz dokumentace).
+Po úspěšné instalaci lze aplikaci spustit skrze vytvořeného zástupce na ploše či Vaše prostředí.
 
 ## Spuštění
 
